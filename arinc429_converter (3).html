@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARINC 429 Frequency Converter</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --panel: #0f1520;
+    --panel2: #141c2b;
+    --border: #1e3a5f;
+    --accent: #00d4ff;
+    --accent2: #00ff9d;
+    --accent3: #ff6b35;
+    --warn: #ffcc00;
+    --text: #c8d8e8;
+    --dim: #4a6080;
+    --glow: 0 0 12px #00d4ff55;
+    --glow2: 0 0 12px #00ff9d55;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated scanline background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,255,0.015) 2px,
+      rgba(0,212,255,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(90deg, #0a0e14 0%, #0f1e30 50%, #0a0e14 100%);
+    flex-wrap: wrap;
+  }
+
+  .logo-icon {
+    width: 38px;
+    height: 38px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--glow);
+    flex-shrink: 0;
+  }
+
+  .logo-icon svg { width: 22px; height: 22px; }
+
+  .header-text { flex: 1; min-width: 0; }
+
+  .header-text h1 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(0.72rem, 3vw, 1.05rem);
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-text p {
+    font-size: clamp(0.6rem, 2vw, 0.72rem);
+    color: var(--dim);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .status-bar {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 8px var(--accent2);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .status-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    letter-spacing: 0.1em;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px 12px;
+    display: grid;
+    gap: 16px;
+  }
+
+  @media (min-width: 600px) {
+    main { padding: 24px 20px; gap: 20px; }
+  }
+
+  /* Mode selector */
+  .mode-selector {
+    display: flex;
+    gap: 2px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px;
+    width: 100%;
+  }
+
+  .mode-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(0.62rem, 2.5vw, 0.75rem);
+    letter-spacing: 0.05em;
+    padding: 10px 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--dim);
+    transition: all 0.2s;
+    text-transform: uppercase;
+    flex: 1;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .mode-btn.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+    box-shadow: var(--glow);
+  }
+
+  .mode-btn:not(.active):hover {
+    color: var(--accent);
+  }
+
+  /* Panels grid */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 700px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    background: var(--panel2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-header .corner {
+    width: 10px; height: 10px;
+    border-top: 2px solid var(--accent);
+    border-left: 2px solid var(--accent);
+  }
+
+  .panel-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .panel-body { padding: 20px; }
+
+  /* Inputs */
+  label {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+
+  label:first-of-type { margin-top: 0; }
+
+  select, input[type="number"], input[type="text"] {
+    width: 100%;
+    background: #0a0e14;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--accent2);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    touch-action: manipulation;
+    min-height: 46px;
+  }
+
+  select:focus, input:focus {
+    border-color: var(--accent);
+    box-shadow: var(--glow);
+  }
+
+  select option { background: #0a0e14; }
+
+  /* Range sub-label */
+  .range-hint {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--dim);
+    margin-top: 4px;
+    letter-spacing: 0.06em;
+  }
+
+  /* Convert button */
+  .btn-convert {
+    margin-top: 18px;
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .btn-convert::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s;
+    z-index: 0;
+  }
+
+  .btn-convert:hover::before { transform: scaleX(1); }
+  .btn-convert:hover { color: #000; box-shadow: var(--glow); }
+  .btn-convert span { position: relative; z-index: 1; }
+
+  /* Output panel */
+  .output-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .output-header {
+    background: var(--panel2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .output-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .output-body { padding: 16px; }
+
+  /* Word display */
+  .word-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .bit-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .bit-section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--dim);
+    width: 44px;
+    flex-shrink: 0;
+    text-align: right;
+    letter-spacing: 0.03em;
+  }
+
+  .bit-cells {
+    display: flex;
+    gap: 2px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+
+  .bit-cell {
+    width: clamp(14px, 3.5vw, 20px);
+    height: clamp(14px, 3.5vw, 20px);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(0.45rem, 1.2vw, 0.6rem);
+    border: 1px solid transparent;
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+
+  .bit-cell.b1 { background: #1a3060; border-color: #234080; color: var(--accent); }
+  .bit-cell.b0 { background: #0d1a2a; border-color: #152030; color: var(--dim); }
+  .bit-cell.ssm { background: #1a2a10; border-color: #2a4018; color: var(--accent2); }
+  .bit-cell.parity { background: #2a1a10; border-color: #402818; color: var(--accent3); }
+  .bit-cell.label { background: #2a1a30; border-color: #401840; color: #d080ff; }
+
+  /* Decoded fields */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  @media (min-width: 480px) {
+    .fields-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .field-card {
+    background: #0a0e14;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+  }
+
+  .field-name {
+    font-size: 0.6rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .field-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--accent2);
+    word-break: break-all;
+  }
+
+  .field-value.hex { color: var(--accent); }
+  .field-value.bin { color: var(--warn); font-size: 0.75rem; }
+  .field-value.oct { color: #d080ff; }
+
+  /* Error */
+  .error-msg {
+    background: #2a0a0a;
+    border: 1px solid #8b2020;
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: #ff6060;
+    letter-spacing: 0.05em;
+    display: none;
+  }
+
+  .error-msg.show { display: block; }
+
+  /* Reference table */
+  .ref-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .ref-header {
+    background: var(--panel2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+
+  .ref-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(0.62rem, 2.5vw, 0.72rem);
+    color: var(--warn);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+  }
+
+  th {
+    background: #0a0e14;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  td {
+    padding: 9px 16px;
+    border-bottom: 1px solid #0f1825;
+    color: var(--text);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #0f1825; }
+
+  td.mono { font-family: 'Share Tech Mono', monospace; color: var(--accent2); }
+  td.oct-col { color: #d080ff; }
+  td.hex-col { color: var(--accent); }
+
+  /* ARINC protocol info */
+  .info-strip {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .info-chip {
+    background: #0a0e14;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(0.6rem, 2vw, 0.68rem);
+    color: var(--dim);
+    letter-spacing: 0.04em;
+  }
+
+  .info-chip span { color: var(--accent); }
+
+  /* Copy button touch */
+  .copy-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--dim);
+    background: none;
+    border: 1px solid var(--dim);
+    padding: 8px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+    min-height: 36px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Scroll hint for table on mobile */
+  .table-hint {
+    display: none;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--dim);
+    text-align: right;
+    padding: 4px 14px 0;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 600px) {
+    .table-hint { display: block; }
+  }
+
+  /* Bit legend */
+  .legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.65rem;
+    color: var(--dim);
+  }
+
+  .legend-swatch {
+    width: 12px; height: 12px;
+    border-radius: 2px;
+  }
+
+  .placeholder {
+    color: var(--dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 30px 0;
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2">
+      <path d="M2 12h4M18 12h4M12 2v4M12 18v4"/>
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1>ARINC 429 Frequency Encoder</h1>
+    <p>Aviation Navigation &amp; Communication Frequency → ARINC 429 Protocol Word</p>
+  </div>
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span class="status-label">SYSTEM NOMINAL</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Protocol info strip -->
+  <div class="info-strip">
+    <div class="info-chip">Word Length: <span>32 bits</span></div>
+    <div class="info-chip">Label: <span>bits 1–8 (octal)</span></div>
+    <div class="info-chip">SDI: <span>bits 9–10</span></div>
+    <div class="info-chip">Data: <span>bits 11–29</span></div>
+    <div class="info-chip">SSM: <span>bits 30–31</span></div>
+    <div class="info-chip">Parity: <span>bit 32 (odd)</span></div>
+    <div class="info-chip">Speed: <span>12.5 / 100 kbps</span></div>
+  </div>
+
+  <!-- Mode selector -->
+  <div>
+    <div class="mode-selector">
+      <button class="mode-btn active" onclick="setMode('nav')" id="btn-nav">NAV (VOR/ILS/DME)</button>
+      <button class="mode-btn" onclick="setMode('com')" id="btn-com">COM (VHF Comm)</button>
+      <button class="mode-btn" onclick="setMode('adf')" id="btn-adf">ADF / NDB</button>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Input panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="corner"></div>
+        <span class="panel-title">Frequency Input</span>
+      </div>
+      <div class="panel-body">
+        <label>Frequency Type / Label</label>
+        <select id="freq-type" onchange="updateHints()">
+          <!-- populated by JS -->
+        </select>
+
+        <label>Frequency (MHz)</label>
+        <input type="number" id="freq-input" placeholder="e.g. 112.30" step="0.01" min="0" oninput="onFreqInput()">
+        <div class="range-hint" id="range-hint"></div>
+
+        <label>SDI (Source / Destination)</label>
+        <select id="sdi-select">
+          <option value="0">00 – No statement</option>
+          <option value="1">01 – Receiver 1</option>
+          <option value="2">10 – Receiver 2</option>
+          <option value="3">11 – Receiver 3</option>
+        </select>
+
+        <label>SSM (Sign / Status Matrix)</label>
+        <select id="ssm-select">
+          <option value="3">11 – Normal operation</option>
+          <option value="0">00 – Failure warning</option>
+          <option value="1">01 – No computed data</option>
+          <option value="2">10 – Functional test</option>
+        </select>
+
+        <button class="btn-convert" onclick="convert()"><span>▶ ENCODE TO ARINC 429</span></button>
+        <div class="error-msg" id="error-box"></div>
+      </div>
+    </div>
+
+    <!-- Output panel -->
+    <div class="output-panel">
+      <div class="output-header">
+        <span class="output-title">⬡ ARINC 429 Word Output</span>
+        <button class="copy-btn" onclick="copyOutput()">COPY HEX</button>
+      </div>
+      <div class="output-body" id="output-area">
+        <div class="placeholder">─── Awaiting frequency input ───</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reference table -->
+  <div class="ref-panel">
+    <div class="ref-header">
+      <span class="ref-title">⚡ ARINC 429 Label Reference — Aviation Frequencies</span>
+    </div>
+    <div class="table-hint">← scroll →</div>
+    <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>System</th>
+          <th>Label (Octal)</th>
+          <th>Label (Hex)</th>
+          <th>Label (Dec)</th>
+          <th>Frequency Band</th>
+          <th>Encoding</th>
+          <th>Resolution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>VOR/ILS (Nav 1)</td><td class="oct-col">034</td><td class="hex-col">0x1C</td><td>28</td><td>108.000–117.975 MHz</td><td>BCD</td><td>50 kHz</td></tr>
+        <tr><td>VOR/ILS (Nav 2)</td><td class="oct-col">035</td><td class="hex-col">0x1D</td><td>29</td><td>108.000–117.975 MHz</td><td>BCD</td><td>50 kHz</td></tr>
+        <tr><td>DME Channel</td><td class="oct-col">036</td><td class="hex-col">0x1E</td><td>30</td><td>108.000–117.975 MHz</td><td>BCD</td><td>50 kHz</td></tr>
+        <tr><td>VHF Comm 1</td><td class="oct-col">030</td><td class="hex-col">0x18</td><td>24</td><td>118.000–136.975 MHz</td><td>BCD</td><td>25 kHz</td></tr>
+        <tr><td>VHF Comm 2</td><td class="oct-col">031</td><td class="hex-col">0x19</td><td>25</td><td>118.000–136.975 MHz</td><td>BCD</td><td>25 kHz</td></tr>
+        <tr><td>VHF Comm 3</td><td class="oct-col">032</td><td class="hex-col">0x1A</td><td>26</td><td>118.000–136.975 MHz</td><td>BCD</td><td>25 kHz</td></tr>
+        <tr><td>ADF / NDB</td><td class="oct-col">044</td><td class="hex-col">0x24</td><td>36</td><td>190–1750 kHz</td><td>BCD</td><td>0.5 kHz</td></tr>
+        <tr><td>ADF 2</td><td class="oct-col">045</td><td class="hex-col">0x25</td><td>37</td><td>190–1750 kHz</td><td>BCD</td><td>0.5 kHz</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ─── Mode & type definitions ───────────────────────────────────────────────
+const MODES = {
+  nav: [
+    { label: 'VOR / ILS Nav 1',  labelOctal: 0o034, min: 108.000, max: 117.975, step: 0.050, unit: 'MHz', bcdFn: encodeNavBCD },
+    { label: 'VOR / ILS Nav 2',  labelOctal: 0o035, min: 108.000, max: 117.975, step: 0.050, unit: 'MHz', bcdFn: encodeNavBCD },
+    { label: 'DME Channel',      labelOctal: 0o036, min: 108.000, max: 117.975, step: 0.050, unit: 'MHz', bcdFn: encodeNavBCD },
+  ],
+  com: [
+    { label: 'VHF Comm 1',       labelOctal: 0o030, min: 118.000, max: 136.975, step: 0.025, unit: 'MHz', bcdFn: encodeComBCD },
+    { label: 'VHF Comm 2',       labelOctal: 0o031, min: 118.000, max: 136.975, step: 0.025, unit: 'MHz', bcdFn: encodeComBCD },
+    { label: 'VHF Comm 3',       labelOctal: 0o032, min: 118.000, max: 136.975, step: 0.025, unit: 'MHz', bcdFn: encodeComBCD },
+  ],
+  adf: [
+    { label: 'ADF / NDB 1 (kHz)', labelOctal: 0o044, min: 190, max: 1750, step: 0.5, unit: 'kHz', bcdFn: encodeAdfBCD },
+    { label: 'ADF 2 (kHz)',        labelOctal: 0o045, min: 190, max: 1750, step: 0.5, unit: 'kHz', bcdFn: encodeAdfBCD },
+  ]
+};
+
+let currentMode = 'nav';
+
+function setMode(m) {
+  currentMode = m;
+  ['nav','com','adf'].forEach(k => {
+    document.getElementById('btn-'+k).classList.toggle('active', k === m);
+  });
+  populateTypes();
+  updateHints();
+  document.getElementById('freq-input').value = '';
+  document.getElementById('output-area').innerHTML = '<div class="placeholder">─── Awaiting frequency input ───</div>';
+  hideError();
+}
+
+function populateTypes() {
+  const sel = document.getElementById('freq-type');
+  sel.innerHTML = '';
+  MODES[currentMode].forEach((t, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = t.label;
+    sel.appendChild(o);
+  });
+}
+
+function getSelected() {
+  return MODES[currentMode][+document.getElementById('freq-type').value];
+}
+
+function updateHints() {
+  const t = getSelected();
+  const step = t.step < 1 ? (t.step * 1000) + ' Hz' : t.step + ' ' + t.unit;
+  document.getElementById('range-hint').textContent =
+    `Range: ${t.min}–${t.max} ${t.unit}  |  Step: ${step}`;
+  document.getElementById('freq-input').step = t.step;
+  document.getElementById('freq-input').min  = t.min;
+  document.getElementById('freq-input').max  = t.max;
+  document.getElementById('freq-input').placeholder = `e.g. ${t.min.toFixed(t.step < 1 ? 1 : 2)}`;
+}
+
+function onFreqInput() { hideError(); }
+
+// ─── BCD Encoding functions ─────────────────────────────────────────────────
+
+// NAV: 108.00–117.95 MHz, 50 kHz steps
+// Encoding per ARINC 429: BCD in bits 11–29
+// Layout (from bit 11): 10s MHz (bits 15–11), 1s MHz (bits 19–16), 100kHz (bits 22–20), 50kHz flag (bit 23), unused=0
+// Simplified standard BCD packing for 108.X50 format:
+// Bits 29-11 = [0][SSM bits not here][BCD digits]
+// We pack: b29..b11 = 19 data bits
+// Standard NAV BCD: FMHX0C where F=100s MHz (always 1), M=10s MHz, H=MHz, X=100kHz, 0=50kHz bit, C=50kHz
+// Per actual ARINC 429 label 034: bits[11..29] encode BCD frequency
+
+function encodeNavBCD(freqMHz) {
+  // Round to nearest 50 kHz
+  const rounded = Math.round(freqMHz * 20) / 20;
+  // Digits: e.g. 112.350 → hundreds=1, tens=1, ones=2, tenths=3, hundredths=5 → 50kHz flag
+  const h  = Math.floor(rounded / 100);   // hundreds (always 1 for NAV)
+  const t  = Math.floor((rounded % 100) / 10);  // tens
+  const o  = Math.floor(rounded % 10);          // ones
+  const kh = Math.floor((rounded * 10) % 10);   // 100kHz digit
+  const f  = Math.round((rounded * 100) % 10) >= 5 ? 1 : 0; // 50kHz flag
+
+  // BCD pack into 19 bits (bits 29 downto 11)
+  // Layout per ARINC 429 label 034 (NAV freq):
+  // bit29..26: BCD hundreds (1 digit = 4 bits, always 0001)
+  // bit25..22: BCD tens
+  // bit21..18: BCD ones
+  // bit17..14: BCD 100kHz
+  // bit13: 50kHz flag
+  // bit12..11: 00 (unused)
+  let data = 0;
+  data |= (h  & 0xF) << 15;  // bits 29-26 → shift 15 within 19-bit field
+  data |= (t  & 0xF) << 11;
+  data |= (o  & 0xF) << 7;
+  data |= (kh & 0xF) << 3;
+  data |= (f  & 0x1) << 2;
+  // bits 1-0 = 00
+  return { data19: data, debug: `${h}${t}${o}.${kh}${f*5}0 MHz` };
+}
+
+function encodeComBCD(freqMHz) {
+  // Round to nearest 25 kHz
+  const rounded = Math.round(freqMHz * 40) / 40;
+  const h  = Math.floor(rounded / 100);
+  const t  = Math.floor((rounded % 100) / 10);
+  const o  = Math.floor(rounded % 10);
+  const kh = Math.floor((rounded * 10) % 10); // 100kHz
+  // 25kHz sub-channel: 0=.000, 1=.025, 2=.050, 3=.075
+  const sub = Math.round((rounded * 1000) % 100 / 25);
+
+  // Pack into 19 bits
+  let data = 0;
+  data |= (h   & 0xF) << 15;
+  data |= (t   & 0xF) << 11;
+  data |= (o   & 0xF) << 7;
+  data |= (kh  & 0xF) << 3;
+  data |= (sub & 0x3) << 1;
+  return { data19: data, debug: `${h}${t}${o}.${kh}${(sub*25).toString().padStart(3,'0')} MHz` };
+}
+
+function encodeAdfBCD(freqKHz) {
+  // 190–1750 kHz, 0.5 kHz steps → encode as XXXX.X kHz BCD
+  const rounded = Math.round(freqKHz * 2) / 2;
+  const th = Math.floor(rounded / 1000);       // thousands
+  const h  = Math.floor((rounded % 1000) / 100); // hundreds
+  const t  = Math.floor((rounded % 100)  / 10);  // tens
+  const o  = Math.floor(rounded % 10);            // ones
+  const f  = (rounded * 10) % 10 >= 5 ? 1 : 0;   // 0.5 kHz flag
+
+  let data = 0;
+  data |= (th & 0xF) << 15;
+  data |= (h  & 0xF) << 11;
+  data |= (t  & 0xF) << 7;
+  data |= (o  & 0xF) << 3;
+  data |= (f  & 0x1) << 2;
+  return { data19: data, debug: `${th}${h}${t}${o}.${f*5} kHz` };
+}
+
+// ─── Parity ─────────────────────────────────────────────────────────────────
+function oddParity(word31) {
+  let ones = 0;
+  for (let i = 0; i < 31; i++) if ((word31 >> i) & 1) ones++;
+  return ones % 2 === 0 ? 1 : 0; // make total ones count odd
+}
+
+// ─── Main convert ────────────────────────────────────────────────────────────
+function convert() {
+  hideError();
+  const t = getSelected();
+  const freq = parseFloat(document.getElementById('freq-input').value);
+
+  if (isNaN(freq)) { showError('Please enter a frequency value.'); return; }
+  if (freq < t.min || freq > t.max) {
+    showError(`Frequency out of range. Valid: ${t.min}–${t.max} ${t.unit}`); return;
+  }
+
+  const sdi  = parseInt(document.getElementById('sdi-select').value);
+  const ssm  = parseInt(document.getElementById('ssm-select').value);
+
+  // Encode label (transmitted LSB first in ARINC, but we store as integer)
+  // Label is bits 1–8, stored as octal, transmitted MSB first of the label byte
+  const labelByte = t.labelOctal & 0xFF;
+
+  const { data19, debug } = t.bcdFn(freq);
+
+  // Build 32-bit word (bit 1 = LSB = bit index 0)
+  // bits  1- 8: label    (LSB first in transmission, but we store label bits directly)
+  // bits  9-10: SDI
+  // bits 11-29: data (19 bits)
+  // bits 30-31: SSM
+  // bit  32:    parity
+
+  let word = 0;
+  // Label (bits 1-8 = positions 0-7) — ARINC transmits label MSB first (reversed byte)
+  const labelTransmit = reverseByte(labelByte);
+  word |= (labelTransmit & 0xFF);
+  // SDI bits 9-10
+  word |= (sdi & 0x3) << 8;
+  // Data bits 11-29 (19 bits)
+  word |= (data19 & 0x7FFFF) << 10;
+  // SSM bits 30-31
+  word |= (ssm & 0x3) << 29;
+  // Parity bit 32
+  const p = oddParity(word);
+  word |= (p & 1) << 31;
+
+  renderOutput(word, t, freq, data19, sdi, ssm, p, labelByte, debug);
+}
+
+function reverseByte(b) {
+  let r = 0;
+  for (let i = 0; i < 8; i++) r |= ((b >> i) & 1) << (7 - i);
+  return r;
+}
+
+// ─── Render ──────────────────────────────────────────────────────────────────
+function renderOutput(word, type, freq, data19, sdi, ssm, parity, labelByte, debug) {
+  const hex  = '0x' + word.toString(16).toUpperCase().padStart(8, '0');
+  const bin  = word.toString(2).padStart(32, '0');
+  const oct  = '0' + parseInt(labelByte).toString(8).padStart(3,'0');
+
+  // Split binary string (bit32=MSB of string, bit1=LSB of string → reverse display)
+  // Display convention: bit 32 on left, bit 1 on right
+  const bits = bin.split(''); // bit32 at index 0
+
+  // Section spans (in display order, bit 32 leftmost):
+  // index 0: bit32 (parity)
+  // index 1-2: bits 31-30 (SSM)
+  // index 3-21: bits 29-11 (data, 19 bits)
+  // index 22-23: bits 10-9 (SDI)
+  // index 24-31: bits 8-1 (label)
+
+  function makeSection(indices, cls, title) {
+    return indices.map(i => `<div class="bit-cell ${cls}">${bits[i]}</div>`).join('');
+  }
+
+  const parityBits = makeSection([0], 'parity', 'P');
+  const ssmBits    = makeSection([1,2], 'ssm', 'SSM');
+  const dataBits   = makeSection(Array.from({length:19},(_,k)=>3+k), bits.slice(3,22).map((b,i)=>`b${b}`).join(',') ? '' : '', '');
+  const dataCells  = Array.from({length:19},(_,k)=>3+k).map(i=>`<div class="bit-cell ${bits[i]==='1'?'b1':'b0'}">${bits[i]}</div>`).join('');
+  const sdiBits    = [22,23].map(i=>`<div class="bit-cell ${bits[i]==='1'?'b1':'b0'}">${bits[i]}</div>`).join('');
+  const labelBits  = Array.from({length:8},(_,k)=>24+k).map(i=>`<div class="bit-cell label">${bits[i]}</div>`).join('');
+
+  const ssmText = ['Failure Warning','No Computed Data','Functional Test','Normal Operation'][ssm];
+  const sdiText = ['No Statement','Receiver 1','Receiver 2','Receiver 3'][sdi];
+
+  const html = `
+    <div class="word-visual">
+      <div class="bit-row">
+        <span class="bit-section-label">Bit 32</span>
+        <div class="bit-cells">${parityBits}</div>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--accent3);margin-left:8px;">PARITY</span>
+      </div>
+      <div class="bit-row">
+        <span class="bit-section-label">31–30</span>
+        <div class="bit-cells">${ssmBits}</div>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--accent2);margin-left:8px;">SSM</span>
+      </div>
+      <div class="bit-row">
+        <span class="bit-section-label">29–11</span>
+        <div class="bit-cells">${dataCells}</div>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--warn);margin-left:8px;">DATA (BCD)</span>
+      </div>
+      <div class="bit-row">
+        <span class="bit-section-label">10–9</span>
+        <div class="bit-cells">${sdiBits}</div>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--dim);margin-left:8px;">SDI</span>
+      </div>
+      <div class="bit-row">
+        <span class="bit-section-label">8–1</span>
+        <div class="bit-cells">${labelBits}</div>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#d080ff;margin-left:8px;">LABEL</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#2a1a10;border:1px solid #402818"></div>Parity</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#1a2a10;border:1px solid #2a4018"></div>SSM</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#1a3060;border:1px solid #234080"></div>Data=1</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#0d1a2a;border:1px solid #152030"></div>Data=0</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#2a1a30;border:1px solid #401840"></div>Label</div>
+    </div>
+
+    <div class="fields-grid" style="margin-top:16px;">
+      <div class="field-card">
+        <div class="field-name">32-bit Word (Hex)</div>
+        <div class="field-value hex" id="out-hex">${hex}</div>
+      </div>
+      <div class="field-card">
+        <div class="field-name">32-bit Word (Dec)</div>
+        <div class="field-value">${(word >>> 0)}</div>
+      </div>
+      <div class="field-card">
+        <div class="field-name">Binary (bit32 → bit1)</div>
+        <div class="field-value bin">${bin.match(/.{1,8}/g).join(' ')}</div>
+      </div>
+      <div class="field-card">
+        <div class="field-name">Label (Octal)</div>
+        <div class="field-value oct">${oct}</div>
+      </div>
+      <div class="field-card">
+        <div class="field-name">Encoded Frequency</div>
+        <div class="field-value">${debug}</div>
+      </div>
+      <div class="field-card">
+        <div class="field-name">Input Frequency</div>
+        <div class="field-value">${freq} ${type.unit}</div>
+      </div>
+      <div class="field-card">
+        <div class="field-name">SSM (${ssm.toString(2).padStart(2,'0')}₂)</div>
+        <div class="field-value">${ssmText}</div>
+      </div>
+      <div class="field-card">
+        <div class="field-name">SDI (${sdi.toString(2).padStart(2,'0')}₂)</div>
+        <div class="field-value">${sdiText}</div>
+      </div>
+      <div class="field-card">
+        <div class="field-name">Parity Bit</div>
+        <div class="field-value">${parity} (Odd)</div>
+      </div>
+      <div class="field-card">
+        <div class="field-name">Data Field (19-bit, Dec)</div>
+        <div class="field-value">${data19} / 0x${data19.toString(16).toUpperCase()}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('output-area').innerHTML = html;
+}
+
+function copyOutput() {
+  const el = document.getElementById('out-hex');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'COPIED!';
+    setTimeout(() => btn.textContent = 'COPY HEX', 1500);
+  });
+}
+
+function showError(msg) {
+  const b = document.getElementById('error-box');
+  b.textContent = '⚠ ' + msg;
+  b.classList.add('show');
+}
+
+function hideError() {
+  document.getElementById('error-box').classList.remove('show');
+}
+
+// Init
+populateTypes();
+updateHints();
+</script>
+</body>
+</html>
