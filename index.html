@@ -276,6 +276,28 @@
     </div>
   </div>
  
+  <!-- CSDB DECODER -->
+  <div class="panel">
+    <div class="panel-header"><div class="corner"></div><span class="panel-title" style="color:var(--warn)">⬡ CSDB Message Builder & Decoder</span></div>
+    <div class="panel-body">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--dim);margin-bottom:10px;letter-spacing:0.06em">
+        Click bit cells to toggle 0/1. Build CSDB message bytes (11-bit format: Start + 8 data + Parity + Stop)
+      </div>
+      
+      <label>Number of Bytes in Message (2-10)</label>
+      <input type="number" id="csdb-byte-count" value="4" min="2" max="10" style="width:120px;background:#0a0e14;border:1px solid var(--border);border-radius:4px;color:var(--accent2);font-family:'Share Tech Mono',monospace;font-size:var(--base-font);padding:8px 12px" onchange="buildCsdbByteTable()">
+      
+      <div id="csdb-byte-table-container" style="margin-top:14px;overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
+      
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn-convert" style="margin-top:0;flex:1;min-width:140px" onclick="decode_csdb_bits()"><span>▶ DECODE MESSAGE</span></button>
+        <button class="btn-convert" style="margin-top:0;flex:1;min-width:140px;border-color:var(--dim);color:var(--dim)" onclick="clearCsdbBits()"><span>✕ CLEAR ALL</span></button>
+      </div>
+      <div class="error-msg" id="csdb-error"></div>
+      <div id="csdb-output" style="margin-top:14px"></div>
+    </div>
+  </div>
+ 
 </main>
  
 <script>
@@ -839,6 +861,148 @@ function decode_word(){
       ${extraHtml}
     </div>`;
 }
+ 
+// ── CSDB DECODER WITH CLICKABLE BITS ───────────────────────
+function buildCsdbByteTable(){
+  const numBytes=parseInt(document.getElementById('csdb-byte-count').value)||4;
+  const container=document.getElementById('csdb-byte-table-container');
+  
+  let html='<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">';
+  html+='<table style="border-collapse:collapse;width:100%;min-width:600px;font-family:Share Tech Mono,monospace">';
+  
+  // Header
+  html+='<thead><tr>';
+  html+='<th style="background:#0a0e14;color:var(--dim);padding:8px;border:1px solid var(--border);font-size:0.6rem">Byte</th>';
+  html+='<th style="background:#0a0e14;color:#ff6b35;padding:8px;border:1px solid var(--border);font-size:0.6rem">Start</th>';
+  for(let i=0;i<8;i++) html+=`<th style="background:#0a0e14;color:var(--accent);padding:8px;border:1px solid var(--border);font-size:0.6rem">D${i}</th>`;
+  html+='<th style="background:#0a0e14;color:#00ff9d;padding:8px;border:1px solid var(--border);font-size:0.6rem">Par</th>';
+  html+='<th style="background:#0a0e14;color:#ff6b35;padding:8px;border:1px solid var(--border);font-size:0.6rem">Stop</th>';
+  html+='<th style="background:#0a0e14;color:var(--warn);padding:8px;border:1px solid var(--border);font-size:0.6rem">Hex</th>';
+  html+='</tr></thead><tbody>';
+  
+  // Rows for each byte
+  for(let b=0;b<numBytes;b++){
+    html+=`<tr id="csdb-byte-${b}">`;
+    html+=`<td style="background:#0f1520;color:var(--text);padding:8px;border:1px solid var(--border);text-align:center;font-weight:700">${b}</td>`;
+    // Start bit (always 0)
+    html+=`<td style="padding:4px;border:1px solid var(--border);text-align:center"><div class="csdb-bit" data-byte="${b}" data-bit="start" style="background:#2a1a10;color:#ff6b35;cursor:default;padding:8px;border-radius:3px;font-weight:700">0</div></td>`;
+    // 8 data bits (clickable)
+    for(let i=0;i<8;i++){
+      html+=`<td style="padding:4px;border:1px solid var(--border);text-align:center"><div class="csdb-bit csdb-data-bit" data-byte="${b}" data-bit="${i}" onclick="toggleCsdbBit(${b},${i})" style="background:#0d1a2a;color:#4a6080;cursor:pointer;padding:8px;border-radius:3px;font-weight:700;transition:all 0.15s">0</div></td>`;
+    }
+    // Parity (auto-calculated)
+    html+=`<td style="padding:4px;border:1px solid var(--border);text-align:center"><div class="csdb-bit" data-byte="${b}" data-bit="parity" style="background:#1a2a10;color:#00ff9d;padding:8px;border-radius:3px;font-weight:700" id="csdb-par-${b}">1</div></td>`;
+    // Stop bit (always 1)
+    html+=`<td style="padding:4px;border:1px solid var(--border);text-align:center"><div class="csdb-bit" data-byte="${b}" data-bit="stop" style="background:#2a1a10;color:#ff6b35;cursor:default;padding:8px;border-radius:3px;font-weight:700">1</div></td>`;
+    // Hex value
+    html+=`<td style="background:#0f1520;color:var(--accent);padding:8px;border:1px solid var(--border);text-align:center;font-weight:700" id="csdb-hex-${b}">0x00</td>`;
+    html+='</tr>';
+  }
+  
+  html+='</tbody></table></div>';
+  container.innerHTML=html;
+}
+ 
+function toggleCsdbBit(byteIdx,bitIdx){
+  const el=document.querySelector(`.csdb-data-bit[data-byte="${byteIdx}"][data-bit="${bitIdx}"]`);
+  const newVal=el.textContent==='0'?'1':'0';
+  el.textContent=newVal;
+  el.style.background=newVal==='1'?'#1a3060':'#0d1a2a';
+  el.style.color=newVal==='1'?'#00d4ff':'#4a6080';
+  updateCsdbByteHex(byteIdx);
+  document.getElementById('csdb-error').classList.remove('show');
+}
+ 
+function updateCsdbByteHex(byteIdx){
+  let byte=0;
+  for(let i=0;i<8;i++){
+    const el=document.querySelector(`.csdb-data-bit[data-byte="${byteIdx}"][data-bit="${i}"]`);
+    if(el&&el.textContent==='1') byte|=(1<<i);
+  }
+  document.getElementById(`csdb-hex-${byteIdx}`).textContent='0x'+byte.toString(16).toUpperCase().padStart(2,'0');
+  
+  // Calculate ODD parity
+  let ones=0;
+  for(let i=0;i<8;i++) if((byte>>i)&1) ones++;
+  const parity=ones%2===0?1:0; // ODD parity
+  document.getElementById(`csdb-par-${byteIdx}`).textContent=parity;
+}
+ 
+function clearCsdbBits(){
+  const numBytes=parseInt(document.getElementById('csdb-byte-count').value)||4;
+  for(let b=0;b<numBytes;b++){
+    for(let i=0;i<8;i++){
+      const el=document.querySelector(`.csdb-data-bit[data-byte="${b}"][data-bit="${i}"]`);
+      if(el){
+        el.textContent='0';
+        el.style.background='#0d1a2a';
+        el.style.color='#4a6080';
+      }
+    }
+    updateCsdbByteHex(b);
+  }
+  document.getElementById('csdb-output').innerHTML='';
+  document.getElementById('csdb-error').classList.remove('show');
+}
+ 
+function decode_csdb_bits(){
+  const err=document.getElementById('csdb-error'); err.classList.remove('show');
+  const numBytes=parseInt(document.getElementById('csdb-byte-count').value)||4;
+  const bytes=[];
+  
+  for(let b=0;b<numBytes;b++){
+    let byte=0;
+    for(let i=0;i<8;i++){
+      const el=document.querySelector(`.csdb-data-bit[data-byte="${b}"][data-bit="${i}"]`);
+      if(el&&el.textContent==='1') byte|=(1<<i);
+    }
+    bytes.push(byte);
+  }
+  
+  // Check for sync
+  const hasSync=bytes[0]===0xA5;
+  const addrIdx=hasSync?1:0;
+  const addr=bytes[addrIdx];
+  const statusByte=bytes.length>addrIdx+1?bytes[addrIdx+1]:null;
+  const dataBytes=bytes.slice(addrIdx+(statusByte!==null?2:1));
+  
+  // Decode status byte
+  let statusHtml='';
+  if(statusByte!==null){
+    const source=(statusByte&0x3).toString(2).padStart(2,'0');
+    const test=(statusByte>>2)&1;
+    const mode=(statusByte>>3)&0x3;
+    const valid3=(statusByte>>5)&1;
+    const valid2=(statusByte>>6)&1;
+    const valid1=(statusByte>>7)&1;
+    statusHtml=`
+      <div class="field-card"><div class="field-name">Status Byte</div><div class="field-value hex">0x${statusByte.toString(16).toUpperCase().padStart(2,'0')}</div></div>
+      <div class="field-card"><div class="field-name">Source ID (bits 1-0)</div><div class="field-value">${source}₂</div></div>
+      <div class="field-card"><div class="field-name">Test Mode (bit 2)</div><div class="field-value">${test?'1 — TEST':'0 — NORMAL'}</div></div>
+      <div class="field-card"><div class="field-name">Mode (bits 4-3)</div><div class="field-value">${mode.toString(2).padStart(2,'0')}₂</div></div>
+      <div class="field-card"><div class="field-name">Valid Flags (bits 7-5)</div><div class="field-value">D1:${valid1} D2:${valid2} D3:${valid3}</div></div>`;
+  }
+  
+  document.getElementById('csdb-output').innerHTML=`
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--accent2);margin-bottom:12px;letter-spacing:0.06em">
+      ${hasSync?'✔ Sync byte detected (0xA5)':'⚠ No sync byte — message may be mid-stream'}
+    </div>
+    <div class="fields-grid">
+      <div class="field-card"><div class="field-name">Address Byte</div><div class="field-value hex">0x${addr.toString(16).toUpperCase().padStart(2,'0')} (${addr})</div></div>
+      <div class="field-card"><div class="field-name">Total Bytes</div><div class="field-value">${bytes.length}</div></div>
+      ${statusHtml}
+      <div class="field-card"><div class="field-name">Data Bytes (${dataBytes.length})</div><div class="field-value hex">${dataBytes.map(b=>'0x'+b.toString(16).toUpperCase().padStart(2,'0')).join(' ')}</div></div>
+      <div class="field-card"><div class="field-name">Data (Decimal)</div><div class="field-value">${dataBytes.join(', ')}</div></div>
+      <div class="field-card"><div class="field-name">Full Message (Hex)</div><div class="field-value hex">${bytes.map(b=>'0x'+b.toString(16).toUpperCase().padStart(2,'0')).join(' ')}</div></div>
+      <div class="field-card"><div class="field-name">Bus Format</div><div class="field-value">CSDB — NRZ, RS-422, ${bytes.length<=6?'12.5 kbps':'50 kbps'}</div></div>
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;color:var(--dim);margin-top:14px;padding:10px;background:#0a0e14;border:1px solid var(--border);border-radius:4px">
+      <strong style="color:var(--warn)">CSDB Format:</strong> 11-bit per byte: Start(0) + D0-D7 (LSB first) + Parity(ODD) + Stop(1). Refer to GAMA CSDB spec for address definitions.
+    </div>`;
+}
+ 
+// Initialize CSDB table on page load
+setTimeout(buildCsdbByteTable,100);
  
 // ── DEVICE SELECTION ────────────────────────────────────────
 function selectDevice(type){
