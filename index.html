@@ -8,92 +8,101 @@
   :root {
     --bg:#0a0e14; --panel:#0f1520; --panel2:#141c2b; --border:#1e3a5f;
     --accent:#00d4ff; --accent2:#00ff9d; --accent3:#ff6b35; --warn:#ffcc00;
-    --text:#c8d8e8; --dim:#4a6080;
-    --glow:0 0 12px #00d4ff55;
+    --text:#c8d8e8; --dim:#4a6080; --glow:0 0 12px #00d4ff55;
+    --base-font:1rem; --label-font:0.66rem; --mono-font:0.72rem;
+    --input-pad:12px 14px; --input-h:46px; --btn-h:52px;
+    --cell-size:20px; --cell-font:0.6rem; --num-font:0.44rem;
+    --chip-font:0.66rem; --field-font:0.88rem; --h1-font:1rem;
   }
+  body.phone { --base-font:1rem; --label-font:0.72rem; --mono-font:0.78rem; --input-pad:14px 16px; --input-h:52px; --btn-h:58px; --cell-size:18px; --cell-font:0.55rem; --num-font:0.38rem; --chip-font:0.7rem; --field-font:0.95rem; --h1-font:0.9rem; }
+  body.pc    { --base-font:0.95rem; --label-font:0.62rem; --mono-font:0.68rem; --input-pad:10px 14px; --input-h:40px; --btn-h:46px; --cell-size:22px; --cell-font:0.65rem; --num-font:0.48rem; --chip-font:0.62rem; --field-font:0.85rem; --h1-font:1.05rem; }
+ 
+  /* DEVICE PROMPT */
+  #device-overlay { position:fixed; inset:0; z-index:9999; background:#0a0e14; display:flex; align-items:center; justify-content:center; }
+  .prompt-box { background:#0f1520; border:1px solid #1e3a5f; border-radius:12px; padding:36px 32px; display:flex; flex-direction:column; align-items:center; gap:24px; max-width:360px; width:90%; box-shadow:0 0 40px #00d4ff18; }
+  .prompt-logo { width:48px; height:48px; border:2px solid #00d4ff; border-radius:6px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 12px #00d4ff55; }
+  .prompt-logo svg { width:28px; height:28px; }
+  .prompt-title { font-family:'Share Tech Mono',monospace; font-size:0.75rem; color:#00d4ff; letter-spacing:0.2em; text-transform:uppercase; text-align:center; }
+  .prompt-sub { font-family:'Share Tech Mono',monospace; font-size:0.62rem; color:#4a6080; letter-spacing:0.1em; text-align:center; margin-top:-16px; }
+  .prompt-btns { display:flex; gap:12px; width:100%; }
+  .prompt-btn { flex:1; padding:18px 10px; background:#0a0e14; border:1px solid #1e3a5f; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:10px; transition:all 0.2s; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+  .prompt-btn:hover,.prompt-btn:active { border-color:#00d4ff; box-shadow:0 0 12px #00d4ff33; background:#0f1a28; }
+  .prompt-btn svg { width:32px; height:32px; }
+  .prompt-btn-label { font-family:'Share Tech Mono',monospace; font-size:0.68rem; color:#c8d8e8; letter-spacing:0.1em; text-transform:uppercase; }
+  .prompt-btn-sub { font-family:'Share Tech Mono',monospace; font-size:0.55rem; color:#4a6080; letter-spacing:0.06em; text-align:center; }
+ 
   * { box-sizing:border-box; margin:0; padding:0; }
   body { background:var(--bg); color:var(--text); font-family:'Exo 2',sans-serif; min-height:100vh; overflow-x:hidden; }
   body::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,0.015) 2px,rgba(0,212,255,0.015) 4px); pointer-events:none; z-index:0; }
-
+ 
   header { position:relative; z-index:1; border-bottom:1px solid var(--border); padding:14px 16px; display:flex; align-items:center; gap:14px; background:linear-gradient(90deg,#0a0e14 0%,#0f1e30 50%,#0a0e14 100%); flex-wrap:wrap; }
   .logo-icon { width:38px; height:38px; border:2px solid var(--accent); border-radius:4px; display:flex; align-items:center; justify-content:center; box-shadow:var(--glow); flex-shrink:0; }
   .logo-icon svg { width:22px; height:22px; }
   .header-text { flex:1; min-width:0; }
-  .header-text h1 { font-family:'Share Tech Mono',monospace; font-size:clamp(0.7rem,3vw,1rem); color:var(--accent); letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .header-text p { font-size:clamp(0.58rem,2vw,0.7rem); color:var(--dim); letter-spacing:0.05em; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .header-text h1 { font-family:'Share Tech Mono',monospace; font-size:var(--h1-font); color:var(--accent); letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .header-text p { font-size:0.7rem; color:var(--dim); letter-spacing:0.05em; margin-top:2px; }
   .status-bar { margin-left:auto; display:flex; gap:8px; align-items:center; flex-shrink:0; }
   .status-dot { width:8px; height:8px; border-radius:50%; background:var(--accent2); box-shadow:0 0 8px var(--accent2); animation:pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   .status-label { font-family:'Share Tech Mono',monospace; font-size:0.7rem; color:var(--accent2); letter-spacing:0.1em; }
-
+ 
   main { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:16px 12px; display:grid; gap:16px; }
   @media(min-width:600px){ main { padding:24px 20px; gap:20px; } }
-
+ 
   .mode-selector { display:flex; gap:2px; background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:4px; width:100%; }
-  .mode-btn { font-family:'Share Tech Mono',monospace; font-size:clamp(0.6rem,2.5vw,0.73rem); letter-spacing:0.04em; padding:10px 6px; border:none; border-radius:4px; cursor:pointer; background:transparent; color:var(--dim); transition:all 0.2s; text-transform:uppercase; flex:1; text-align:center; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+  .mode-btn { font-family:'Share Tech Mono',monospace; font-size:var(--mono-font); letter-spacing:0.04em; padding:10px 6px; border:none; border-radius:4px; cursor:pointer; background:transparent; color:var(--dim); transition:all 0.2s; text-transform:uppercase; flex:1; text-align:center; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
   .mode-btn.active { background:var(--accent); color:#000; font-weight:700; box-shadow:var(--glow); }
   .mode-btn:not(.active):hover { color:var(--accent); }
-
+ 
   .info-strip { display:flex; gap:8px; flex-wrap:wrap; }
-  .info-chip { background:#0a0e14; border:1px solid var(--border); border-radius:20px; padding:5px 12px; font-family:'Share Tech Mono',monospace; font-size:clamp(0.58rem,2vw,0.66rem); color:var(--dim); letter-spacing:0.04em; }
+  .info-chip { background:#0a0e14; border:1px solid var(--border); border-radius:20px; padding:5px 12px; font-family:'Share Tech Mono',monospace; font-size:var(--chip-font); color:var(--dim); letter-spacing:0.04em; }
   .info-chip span { color:var(--accent); }
-
+ 
   .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   @media(max-width:700px){ .grid-2 { grid-template-columns:1fr; } }
-
+ 
   .panel { background:var(--panel); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
   .panel-header { background:var(--panel2); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px; }
   .corner { width:10px; height:10px; border-top:2px solid var(--accent); border-left:2px solid var(--accent); }
-  .panel-title { font-family:'Share Tech Mono',monospace; font-size:0.72rem; letter-spacing:0.15em; color:var(--accent); text-transform:uppercase; }
+  .panel-title { font-family:'Share Tech Mono',monospace; font-size:var(--mono-font); letter-spacing:0.15em; color:var(--accent); text-transform:uppercase; }
   .panel-body { padding:16px; }
-
-  label { display:block; font-size:0.66rem; color:var(--dim); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:6px; margin-top:14px; }
+ 
+  label { display:block; font-size:var(--label-font); color:var(--dim); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:6px; margin-top:14px; }
   label:first-of-type { margin-top:0; }
-  select, input[type="number"] { width:100%; background:#0a0e14; border:1px solid var(--border); border-radius:4px; color:var(--accent2); font-family:'Share Tech Mono',monospace; font-size:1rem; padding:12px 14px; outline:none; transition:border-color 0.2s,box-shadow 0.2s; appearance:none; -webkit-appearance:none; touch-action:manipulation; min-height:46px; }
+  select, input[type="number"] { width:100%; background:#0a0e14; border:1px solid var(--border); border-radius:4px; color:var(--accent2); font-family:'Share Tech Mono',monospace; font-size:var(--base-font); padding:var(--input-pad); outline:none; transition:border-color 0.2s,box-shadow 0.2s; appearance:none; -webkit-appearance:none; touch-action:manipulation; min-height:var(--input-h); }
   select:focus, input:focus { border-color:var(--accent); box-shadow:var(--glow); }
   select option { background:#0a0e14; }
   .range-hint { font-family:'Share Tech Mono',monospace; font-size:0.63rem; color:var(--dim); margin-top:4px; letter-spacing:0.04em; }
-
-  .btn-convert { margin-top:18px; width:100%; padding:16px; background:transparent; border:1px solid var(--accent); border-radius:4px; color:var(--accent); font-family:'Share Tech Mono',monospace; font-size:0.8rem; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; min-height:52px; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+ 
+  .btn-convert { margin-top:18px; width:100%; padding:16px; background:transparent; border:1px solid var(--accent); border-radius:4px; color:var(--accent); font-family:'Share Tech Mono',monospace; font-size:var(--mono-font); letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; min-height:var(--btn-h); -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
   .btn-convert::before { content:''; position:absolute; inset:0; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform 0.2s; z-index:0; }
   .btn-convert:hover::before { transform:scaleX(1); }
   .btn-convert:hover { color:#000; box-shadow:var(--glow); }
   .btn-convert span { position:relative; z-index:1; }
-
+ 
   .output-panel { background:var(--panel); border:1px solid var(--border); border-radius:8px; }
   .output-header { background:var(--panel2); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; }
-  .output-title { font-family:'Share Tech Mono',monospace; font-size:0.72rem; color:var(--accent3); letter-spacing:0.12em; text-transform:uppercase; }
+  .output-title { font-family:'Share Tech Mono',monospace; font-size:var(--mono-font); color:var(--accent3); letter-spacing:0.12em; text-transform:uppercase; }
   .copy-btn { font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--dim); background:none; border:1px solid var(--dim); padding:8px 14px; border-radius:3px; cursor:pointer; letter-spacing:0.08em; transition:all 0.2s; min-height:36px; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
   .copy-btn:hover { color:var(--accent); border-color:var(--accent); }
   .output-body { padding:16px; }
-
-  .word-visual { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px; }
-  .bit-row { display:flex; align-items:center; gap:4px; min-width:0; }
-  .bit-section-label { font-family:'Share Tech Mono',monospace; font-size:0.58rem; color:var(--dim); width:44px; flex-shrink:0; text-align:right; letter-spacing:0.03em; }
-  .bit-cells { display:flex; gap:2px; flex-wrap:nowrap; flex-shrink:0; }
-  .bit-cell { width:clamp(14px,3.5vw,20px); height:clamp(14px,3.5vw,20px); border-radius:2px; display:flex; align-items:center; justify-content:center; font-family:'Share Tech Mono',monospace; font-size:clamp(0.42rem,1.2vw,0.6rem); border:1px solid transparent; flex-shrink:0; }
-  .bit-cell.b1  { background:#1a3060; border-color:#234080; color:var(--accent); }
-  .bit-cell.b0  { background:#0d1a2a; border-color:#152030; color:var(--dim); }
-  .bit-cell.ssm { background:#1a2a10; border-color:#2a4018; color:var(--accent2); }
-  .bit-cell.par { background:#2a1a10; border-color:#402818; color:var(--accent3); }
-  .bit-cell.lbl { background:#2a1a30; border-color:#401840; color:#d080ff; }
-
+ 
   .fields-grid { display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px; }
   @media(min-width:480px){ .fields-grid { grid-template-columns:1fr 1fr; } }
   .field-card { background:#0a0e14; border:1px solid var(--border); border-radius:4px; padding:10px 14px; }
   .field-name { font-size:0.6rem; color:var(--dim); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:4px; }
-  .field-value { font-family:'Share Tech Mono',monospace; font-size:0.88rem; color:var(--accent2); word-break:break-all; }
+  .field-value { font-family:'Share Tech Mono',monospace; font-size:var(--field-font); color:var(--accent2); word-break:break-all; }
   .field-value.hex { color:var(--accent); }
   .field-value.bin { color:var(--warn); font-size:0.72rem; }
   .field-value.oct { color:#d080ff; }
-
+ 
   .legend { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
   .legend-item { display:flex; align-items:center; gap:6px; font-size:0.63rem; color:var(--dim); }
   .legend-swatch { width:12px; height:12px; border-radius:2px; }
-
+ 
   .error-msg { background:#2a0a0a; border:1px solid #8b2020; border-radius:4px; padding:12px 16px; font-family:'Share Tech Mono',monospace; font-size:0.78rem; color:#ff6060; letter-spacing:0.05em; display:none; margin-top:10px; }
   .error-msg.show { display:block; }
-
+ 
   .ref-panel { background:var(--panel); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
   .ref-header { background:var(--panel2); border-bottom:1px solid var(--border); padding:12px 14px; }
   .ref-title { font-family:'Share Tech Mono',monospace; font-size:clamp(0.6rem,2.5vw,0.72rem); color:var(--warn); letter-spacing:0.1em; text-transform:uppercase; }
@@ -108,10 +117,53 @@
   td.oct-col { color:#d080ff; }
   td.hex-col { color:var(--accent); }
   .placeholder { color:var(--dim); font-family:'Share Tech Mono',monospace; font-size:0.78rem; text-align:center; padding:30px 0; letter-spacing:0.08em; }
+ 
+  .decode-input { width:clamp(14px,3.5vw,22px); height:clamp(22px,4vw,28px); background:#0a0e14; border:1px solid var(--border); border-radius:2px; color:var(--accent2); font-family:'Share Tech Mono',monospace; font-size:clamp(0.5rem,1.4vw,0.72rem); font-weight:700; text-align:center; outline:none; padding:0; transition:border-color 0.15s,box-shadow 0.15s; -webkit-appearance:none; appearance:none; caret-color:var(--accent); }
+  .decode-input:focus { border-color:var(--accent); box-shadow:var(--glow); }
+  .decode-input.has-val { color:var(--warn); }
+  .decode-cell {
+    width:clamp(14px,3.5vw,22px); height:clamp(22px,4vw,28px);
+    background:#0a0e14; border:1px solid var(--border);
+    border-radius:2px; color:var(--dim);
+    font-family:'Share Tech Mono',monospace;
+    font-size:clamp(0.5rem,1.4vw,0.72rem); font-weight:700;
+    text-align:center; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; user-select:none;
+    transition:all 0.15s;
+  }
+  .decode-cell:hover { border-color:var(--accent); background:#0f1a28; }
+  .decode-cell.bit-on { background:#1a3060; color:var(--accent); border-color:#234080; }
 </style>
 </head>
 <body>
-
+ 
+<!-- DEVICE PROMPT -->
+<div id="device-overlay">
+  <div class="prompt-box">
+    <div class="prompt-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2">
+        <path d="M2 12h4M18 12h4M12 2v4M12 18v4"/>
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>
+      </svg>
+    </div>
+    <div class="prompt-title">ARINC 429 Converter</div>
+    <div class="prompt-sub">Select your device to optimise the display</div>
+    <div class="prompt-btns">
+      <button class="prompt-btn" onclick="selectDevice('phone')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="#00d4ff"/></svg>
+        <span class="prompt-btn-label">Phone</span>
+        <span class="prompt-btn-sub">Larger text &amp; touch targets</span>
+      </button>
+      <button class="prompt-btn" onclick="selectDevice('pc')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        <span class="prompt-btn-label">PC / Tablet</span>
+        <span class="prompt-btn-sub">Compact &amp; information-dense</span>
+      </button>
+    </div>
+  </div>
+</div>
+ 
 <header>
   <div class="logo-icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2">
@@ -129,9 +181,9 @@
     <span class="status-label">NOMINAL</span>
   </div>
 </header>
-
+ 
 <main>
-
+ 
   <div class="info-strip">
     <div class="info-chip">Word: <span>32 bits</span></div>
     <div class="info-chip">Label: <span>bits 1–8 (octal)</span></div>
@@ -140,187 +192,494 @@
     <div class="info-chip">SSM: <span>bits 30–31</span></div>
     <div class="info-chip">Parity: <span>bit 32 (odd)</span></div>
   </div>
-
+ 
   <div class="mode-selector">
     <button class="mode-btn active" onclick="setMode('nav')" id="btn-nav">NAV / ILS</button>
     <button class="mode-btn" onclick="setMode('com')" id="btn-com">COM</button>
     <button class="mode-btn" onclick="setMode('adf')" id="btn-adf">ADF</button>
   </div>
-
+ 
   <div class="grid-2">
     <div class="panel">
-      <div class="panel-header"><div class="corner"></div><span class="panel-title">Frequency Input</span></div>
-      <div class="panel-body">
-        <label>Frequency Type / Label</label>
-        <select id="freq-type" onchange="updateHints()"></select>
-        <label>Frequency</label>
-        <input type="number" id="freq-input" placeholder="e.g. 112.30" step="0.01" min="0" oninput="onFreqInput()">
-        <div class="range-hint" id="range-hint"></div>
-        <label>SDI (Source / Destination)</label>
-        <select id="sdi-select">
-          <option value="0">00 – No statement</option>
-          <option value="1">01 – Receiver 1</option>
-          <option value="2">10 – Receiver 2</option>
-          <option value="3">11 – Receiver 3</option>
-        </select>
-        <label>SSM (Sign / Status Matrix)</label>
-        <select id="ssm-select">
-          <option value="3">11 – Normal operation</option>
-          <option value="0">00 – Failure warning</option>
-          <option value="1">01 – No computed data</option>
-          <option value="2">10 – Functional test</option>
-        </select>
-        <button class="btn-convert" onclick="arinc_convert()"><span>▶ ENCODE TO ARINC 429</span></button>
-        <div class="error-msg" id="arinc-error"></div>
+      <div class="panel-header"><div class="corner"></div><span class="panel-title" id="input-panel-title">Frequency Input</span></div>
+      <div class="panel-body" id="input-panel-body">
+        <!-- populated by JS -->
       </div>
     </div>
-
+ 
     <div class="output-panel">
       <div class="output-header">
         <span class="output-title">⬡ ARINC 429 Word</span>
         <button class="copy-btn" id="copy-btn" onclick="copyHex()">COPY HEX</button>
       </div>
       <div class="output-body" id="arinc-output">
-        <div class="placeholder">─── Awaiting frequency input ───</div>
+        <div class="placeholder">─── Awaiting input ───</div>
       </div>
     </div>
   </div>
-
+ 
+  <!-- DECODE PANEL -->
+  <div class="panel">
+    <div class="panel-header"><div class="corner"></div><span class="panel-title">⬡ Manual Bit Entry → Decode</span></div>
+    <div class="panel-body">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--dim);margin-bottom:10px;letter-spacing:0.06em">
+        Click each bit cell to toggle between <span style="color:var(--accent)">0</span> and <span style="color:var(--accent)">1</span>. Bit 32 = leftmost. Press DECODE to extract all fields.
+      </div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px">
+        <table id="decode-table" style="border-collapse:collapse;min-width:480px;width:100%">
+          <thead><tr id="decode-header-row"></tr></thead>
+          <tbody><tr id="decode-num-row"></tr><tr id="decode-input-row"></tr></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn-convert" style="margin-top:0;flex:1;min-width:140px" onclick="decode_word()"><span>▶ DECODE WORD</span></button>
+        <button class="btn-convert" style="margin-top:0;flex:1;min-width:140px;border-color:var(--dim);color:var(--dim)" onclick="clearDecode()"><span>✕ CLEAR</span></button>
+      </div>
+      <div class="error-msg" id="decode-error"></div>
+      <div id="decode-output" style="margin-top:14px"></div>
+    </div>
+  </div>
+ 
+  <!-- REFERENCE TABLE -->
   <div class="ref-panel">
     <div class="ref-header"><span class="ref-title">⚡ ARINC 429 Label Reference</span></div>
     <div class="table-hint">← scroll →</div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>System</th><th>Label (Oct)</th><th>Label (Hex)</th><th>Band</th><th>Encoding</th><th>Resolution</th></tr></thead>
+        <thead><tr><th>Label (Oct)</th><th>System</th><th>Band</th><th>Resolution</th><th>Special Bits</th></tr></thead>
         <tbody>
-          <tr><td>VHF Comm</td><td class="oct-col">030</td><td class="hex-col">0x18</td><td>118.000–136.975 MHz</td><td>BCD</td><td>25 kHz</td></tr>
-          <tr><td>ADF</td><td class="oct-col">032</td><td class="hex-col">0x1A</td><td>190–1750 kHz</td><td>BCD</td><td>0.5 kHz</td></tr>
-          <tr><td>ILS</td><td class="oct-col">033</td><td class="hex-col">0x1B</td><td>108.000–117.975 MHz</td><td>BCD</td><td>50 kHz</td></tr>
-          <tr><td>VOR/ILS (bit14: ILS=1, VOR=0)</td><td class="oct-col">034</td><td class="hex-col">0x1C</td><td>108.000–117.975 MHz</td><td>BCD</td><td>50 kHz</td></tr>
-          <tr><td>DME</td><td class="oct-col">035</td><td class="hex-col">0x1D</td><td>108.000–117.975 MHz</td><td>BCD</td><td>50 kHz</td></tr>
-          <tr><td>ADF/NDB 1</td><td class="oct-col">044</td><td class="hex-col">0x24</td><td>190–1750 kHz</td><td>BCD</td><td>0.5 kHz</td></tr>
-          <tr><td>ADF 2</td><td class="oct-col">045</td><td class="hex-col">0x25</td><td>190–1750 kHz</td><td>BCD</td><td>0.5 kHz</td></tr>
+          <tr><td style="color:#d080ff">030</td><td>VHF Comm</td><td>118.000–136.975 MHz</td><td>0.001 MHz (1 kHz)</td><td>—</td></tr>
+          <tr><td style="color:#d080ff">032</td><td>ADF</td><td>190.0–1750.0 kHz</td><td>1 kHz</td><td>Bit14=0.5kHz, Bit12=ANT/ADF, Bit11=BFO</td></tr>
+          <tr><td style="color:#d080ff">033</td><td>ILS</td><td>108.10–111.95 MHz</td><td>0.01 MHz</td><td>Bits 12–11: CAT (00=UND,01=I,10=II,11=III)</td></tr>
+          <tr><td style="color:#d080ff">034</td><td>VOR / ILS</td><td>108.00–117.95 MHz</td><td>0.01 MHz</td><td>Bit14: 0=VOR, 1=ILS</td></tr>
+          <tr><td style="color:#d080ff">035</td><td>DME</td><td>108.00–117.95 MHz</td><td>0.01 MHz</td><td>Bit18=0.05MHz, Bit17=IDENT, Bit16=DISPLAY, Bits15-14=Mode</td></tr>
+          <tr><td style="color:#d080ff">044</td><td>ADF/NDB 1</td><td>190.0–1750.0 kHz</td><td>1 kHz</td><td>—</td></tr>
+          <tr><td style="color:#d080ff">045</td><td>ADF 2</td><td>190.0–1750.0 kHz</td><td>1 kHz</td><td>—</td></tr>
         </tbody>
       </table>
     </div>
   </div>
-
+ 
+  <!-- SSM TABLE -->
+  <div class="ref-panel">
+    <div class="ref-header"><span class="ref-title" style="color:var(--accent2)">⚡ SSM Table — Radio Frequency Labels</span></div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Bit 31</th><th>Bit 30</th><th>SSM Value</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td style="color:var(--accent2)">00</td><td>Normal (NML)</td></tr>
+          <tr><td>0</td><td>1</td><td style="color:var(--warn)">01</td><td>No Computed Data (NCD)</td></tr>
+          <tr><td>1</td><td>0</td><td style="color:var(--warn)">10</td><td>Functional Test (FT)</td></tr>
+          <tr><td>1</td><td>1</td><td style="color:#ff6060">11</td><td>Undefined</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+ 
 </main>
-
+ 
 <script>
-const AM = {
-  nav:[
-    {label:'ILS (033)',      lo:0o033, min:108, max:117.975, step:0.05,  unit:'MHz', fn:navBCD},
-    {label:'VOR/ILS (034)',  lo:0o034, min:108, max:117.975, step:0.05,  unit:'MHz', fn:navBCD},
-    {label:'DME (035)',      lo:0o035, min:108, max:117.975, step:0.05,  unit:'MHz', fn:navBCD},
-  ],
-  com:[
-    {label:'VHF Comm (030)', lo:0o030, min:118, max:136.975, step:0.025, unit:'MHz', fn:comBCD},
-  ],
-  adf:[
-    {label:'ADF (032)',      lo:0o032, min:190, max:1750,    step:0.5,   unit:'kHz', fn:adfBCD},
-    {label:'ADF/NDB 1 (044)',lo:0o044, min:190, max:1750,    step:0.5,   unit:'kHz', fn:adfBCD},
-    {label:'ADF 2 (045)',    lo:0o045, min:190, max:1750,    step:0.5,   unit:'kHz', fn:adfBCD},
-  ]
+// ═══════════════════════════════════════════════════════════════
+// LABEL DEFINITIONS
+// Each label has its own encode/decode logic per documentation
+// ═══════════════════════════════════════════════════════════════
+ 
+const MODES = {
+  nav: ['nav_034','nav_033','nav_035'],
+  com: ['com_030'],
+  adf: ['adf_032','adf_044','adf_045']
 };
-let am='nav';
-
+ 
+const LABELS = {
+ 
+  // ── LABEL 034: VOR/ILS ─────────────────────────────────────
+  // Bits 29-26: 10MHz BCD
+  // Bits 25-22: 1MHz BCD
+  // Bits 21-18: 0.1MHz BCD
+  // Bits 17-14: 0.01MHz BCD  ← bit14 also serves as VOR/ILS flag
+  // Bits 13-11: PAD (0)
+  // bit14=0:VOR, bit14=1:ILS (determined by odd 100kHz digit)
+  nav_034: {
+    label:'VOR/ILS (034)', lo:0o034,
+    min:108.00, max:117.95, step:0.05, unit:'MHz',
+    fields:[
+      {name:'Frequency (MHz)', type:'freq'},
+    ],
+    encode(vals){
+      const f = parseFloat(vals.freq);
+      const r = Math.round(f*100)/100;
+      const mhz10 = Math.floor(r/10)%10;
+      const mhz1  = Math.floor(r)%10;
+      const khz100= Math.floor(r*10)%10;
+      const khz10 = Math.floor(r*100)%10;
+      // bit14: ILS if freq in ILS band (odd 100kHz digit, 108.10-111.95)
+      const isILS = (r>=108.10 && r<=111.95 && khz100%2!==0);
+      // Pack bits 29-11 (19 bits):
+      // [29-26]=mhz10(4b) [25-22]=mhz1(4b) [21-18]=khz100(4b) [17-14]=khz10(4b) [13-11]=PAD(3b)
+      let d19=0;
+      d19 |= (mhz10 &0xF)<<15;
+      d19 |= (mhz1  &0xF)<<11;
+      d19 |= (khz100&0xF)<<7;
+      d19 |= (khz10 &0xF)<<3;
+      // bit14 = index 3 from LSB of d19 = already set by khz10 LSB
+      // Actually bit14 is the LSB of the khz10 nibble
+      // Per doc: bit14 is VOR/ILS flag = LSB of 0.01MHz digit
+      // For ILS freqs the 0.01MHz digit has bit14=1
+      return {d19, extra:{isILS, freq:r}};
+    },
+    extraCards(ex){
+      const b14=(ex.d19>>3)&1; // bit14 = d19 bit3
+      return `<div class="field-card"><div class="field-name">Bit 14 (VOR/ILS)</div><div class="field-value" style="color:${b14?'var(--accent2)':'#8080c0'}">${b14?'1 — ILS':'0 — VOR'}</div></div>`;
+    }
+  },
+ 
+  // ── LABEL 033: ILS ─────────────────────────────────────────
+  // Bits 29-26: 10MHz BCD
+  // Bits 25-22: 1MHz BCD
+  // Bits 21-18: 0.1MHz BCD
+  // Bits 17-14: 0.01MHz BCD
+  // Bits 13-12: PAD
+  // Bits 12-11: ILS CAT (00=UND, 01=CAT I, 10=CAT II, 11=CAT III)
+  nav_033: {
+    label:'ILS (033)', lo:0o033,
+    min:108.10, max:111.95, step:0.05, unit:'MHz',
+    fields:[
+      {name:'Frequency (MHz)', type:'freq'},
+      {name:'ILS Category', type:'select', id:'cat',
+       options:['00 — Undefined','01 — CAT I','10 — CAT II','11 — CAT III']}
+    ],
+    encode(vals){
+      const f=parseFloat(vals.freq);
+      const r=Math.round(f*100)/100;
+      const mhz10 =Math.floor(r/10)%10;
+      const mhz1  =Math.floor(r)%10;
+      const khz100=Math.floor(r*10)%10;
+      const khz10 =Math.floor(r*100)%10;
+      const cat   =parseInt(vals.cat)||0;
+      let d19=0;
+      d19|=(mhz10 &0xF)<<15;
+      d19|=(mhz1  &0xF)<<11;
+      d19|=(khz100&0xF)<<7;
+      d19|=(khz10 &0xF)<<3;
+      // bits 12-11 = cat (bits 1-0 of d19... wait: bit12=d19 bit1, bit11=d19 bit0)
+      d19|=(cat&0x3);
+      return {d19, extra:{cat}};
+    },
+    extraCards(ex){
+      const catNames=['Undefined','CAT I','CAT II','CAT III'];
+      return `<div class="field-card"><div class="field-name">ILS Category (bits 12–11)</div><div class="field-value" style="color:var(--warn)">${catNames[ex.cat]||'—'}</div></div>`;
+    }
+  },
+ 
+  // ── LABEL 035: DME ─────────────────────────────────────────
+  // Bits 29-26: 10MHz BCD
+  // Bits 25-22: 1MHz BCD
+  // Bits 21-18: 0.1MHz BCD
+  // Bit 18: 0.05MHz flag
+  // Bit 17: IDENT (1=ON)
+  // Bit 16: DISPLAY (1=ON)
+  // Bits 15-14: NAV MODE (00=VOR,01=ILS,10=MLS,11=UND)
+  // Bits 13-12: DME MODE (scan/standby)
+  // Bits 11: PAD
+  nav_035: {
+    label:'DME (035)', lo:0o035,
+    min:108.00, max:117.95, step:0.05, unit:'MHz',
+    fields:[
+      {name:'Frequency (MHz)', type:'freq'},
+      {name:'Ident', type:'select', id:'ident', options:['0 — OFF','1 — ON']},
+      {name:'Display', type:'select', id:'display', options:['0 — OFF','1 — ON']},
+      {name:'NAV Mode (bits 15–14)', type:'select', id:'navmode', options:['00 — VOR','01 — ILS','10 — MLS','11 — Undefined']},
+    ],
+    encode(vals){
+      const f=parseFloat(vals.freq);
+      const r=Math.round(f*20)/20; // round to 50kHz
+      const mhz10 =Math.floor(r/10)%10;
+      const mhz1  =Math.floor(r)%10;
+      const khz100=Math.floor(r*10)%10;
+      const fl50  =Math.round((r*100)%10)>=5?1:0; // 50kHz flag bit18
+      const ident  =parseInt(vals.ident)||0;
+      const display=parseInt(vals.display)||0;
+      const navmode=parseInt(vals.navmode)||0;
+      // d19 layout (bit29=MSB=d19 bit18):
+      // [b18=fl50][b17=ident][b16=display][b15-b14=navmode][b13-b11=PAD]
+      // Plus BCD in bits 29-19:
+      // bits29-26=mhz10, bits25-22=mhz1, bits21-19=khz100 top 3 bits, bit18=khz100 LSB or fl50
+      // Per doc: bits29-22=10MHz+1MHz BCD, bits21-18=0.1MHz BCD, bit18=0.05MHz
+      // Let's use: [29-26]=10MHz [25-22]=1MHz [21-18]=0.1MHz(4b, where bit18 is 0.05 flag)
+      let d19=0;
+      d19|=(mhz10 &0xF)<<15;
+      d19|=(mhz1  &0xF)<<11;
+      d19|=(khz100&0xF)<<7;  // bits21-18
+      // overwrite bit18 (d19 bit7) with fl50 if needed — actually khz100 already includes it
+      // bit17=ident, bit16=display, bits15-14=navmode
+      d19|=(ident  &1)<<6;   // bit17 = d19[6]
+      d19|=(display&1)<<5;   // bit16 = d19[5]
+      d19|=(navmode&3)<<3;   // bits15-14 = d19[4:3]
+      return {d19, extra:{ident,display,navmode,fl50}};
+    },
+    extraCards(ex){
+      const nm=['VOR','ILS','MLS','Undefined'];
+      return `
+        <div class="field-card"><div class="field-name">Ident (bit 17)</div><div class="field-value">${ex.ident?'1 — ON':'0 — OFF'}</div></div>
+        <div class="field-card"><div class="field-name">Display (bit 16)</div><div class="field-value">${ex.display?'1 — ON':'0 — OFF'}</div></div>
+        <div class="field-card"><div class="field-name">NAV Mode (bits 15–14)</div><div class="field-value" style="color:var(--warn)">${nm[ex.navmode]}</div></div>`;
+    }
+  },
+ 
+  // ── LABEL 030: COM VHF ─────────────────────────────────────
+  // Bits 29-26: 100MHz BCD  (always 1)
+  // Bits 25-22: 10MHz BCD
+  // Bits 21-18: 1MHz BCD
+  // Bits 17-14: 0.1MHz BCD
+  // Bits 13-11: 0.001MHz BCD (1kHz, 3 bits for 0-4 then flag)
+  // Per doc: 10MHz, 1MHz, 0.1MHz, 0.01MHz, 0.001MHz all BCD
+  com_030: {
+    label:'VHF Comm (030)', lo:0o030,
+    min:118.000, max:136.975, step:0.025, unit:'MHz',
+    fields:[{name:'Frequency (MHz)', type:'freq'}],
+    encode(vals){
+      const f=parseFloat(vals.freq);
+      const r=Math.round(f*1000)/1000;
+      const mhz100=Math.floor(r/100)%10;
+      const mhz10 =Math.floor(r/10)%10;
+      const mhz1  =Math.floor(r)%10;
+      const khz100=Math.floor(r*10)%10;
+      const khz10 =Math.floor(r*100)%10;
+      const khz1  =Math.floor(r*1000)%10;
+      // Pack: [29-26]=100MHz [25-22]=10MHz [21-18]=1MHz [17-14]=0.1MHz [13-11]=0.01MHz(top3bits)
+      let d19=0;
+      d19|=(mhz100&0xF)<<15;
+      d19|=(mhz10 &0xF)<<11;
+      d19|=(mhz1  &0xF)<<7;
+      d19|=(khz100&0xF)<<3;
+      d19|=(khz10 &0x7)<<0; // 3 bits for 0.01MHz (bits 13-11)
+      return {d19, extra:{freq:r, khz1}};
+    },
+    extraCards(ex){
+      return `<div class="field-card"><div class="field-name">Encoded Freq</div><div class="field-value">${ex.freq.toFixed(3)} MHz</div></div>`;
+    }
+  },
+ 
+  // ── LABEL 032: ADF ─────────────────────────────────────────
+  // Bits 29-26: 1000kHz BCD
+  // Bits 25-22: 100kHz BCD
+  // Bits 21-18: 10kHz BCD
+  // Bits 17-14: 1kHz BCD
+  // Bits 13-12: PAD
+  // Bit 14: 0.5kHz flag (LSB of 1kHz nibble)
+  // Bit 12: ANT(1) / ADF(0) mode
+  // Bit 11: BFO ON(1) / OFF(0)
+  adf_032: {
+    label:'ADF (032)', lo:0o032,
+    min:190.0, max:1750.0, step:0.5, unit:'kHz',
+    fields:[
+      {name:'Frequency (kHz)', type:'freq'},
+      {name:'Mode (bit 12)', type:'select', id:'antmode', options:['0 — ADF Mode','1 — ANT Mode']},
+      {name:'BFO (bit 11)',  type:'select', id:'bfo',     options:['0 — BFO OFF','1 — BFO ON']},
+    ],
+    encode(vals){
+      const f=parseFloat(vals.freq);
+      const r=Math.round(f*2)/2;
+      const khz1000=Math.floor(r/1000)%10;
+      const khz100 =Math.floor(r/100)%10;
+      const khz10  =Math.floor(r/10)%10;
+      const khz1   =Math.floor(r)%10;
+      const fl05   =Math.round((r*10)%10)>=5?1:0;
+      const ant    =parseInt(vals.antmode)||0;
+      const bfo    =parseInt(vals.bfo)||0;
+      // [29-26]=1000kHz [25-22]=100kHz [21-18]=10kHz [17-14]=1kHz(4b,LSB=0.5kHz)
+      // bit12=ANT/ADF bit11=BFO
+      let d19=0;
+      d19|=(khz1000&0xF)<<15;
+      d19|=(khz100 &0xF)<<11;
+      d19|=(khz10  &0xF)<<7;
+      d19|=(khz1   &0xF)<<3;
+      if(fl05) d19|=(1<<3); // bit14=d19[3] = 0.5kHz flag (overwrites LSB of khz1)
+      d19|=(ant&1)<<1;  // bit12=d19[1]
+      d19|=(bfo&1)<<0;  // bit11=d19[0]
+      return {d19, extra:{freq:r, fl05, ant, bfo}};
+    },
+    extraCards(ex){
+      return `
+        <div class="field-card"><div class="field-name">0.5 kHz Flag (bit 14)</div><div class="field-value">${ex.fl05?'1 — 0.5 kHz':'0 — 0.0 kHz'}</div></div>
+        <div class="field-card"><div class="field-name">Mode (bit 12)</div><div class="field-value">${ex.ant?'1 — ANT Mode':'0 — ADF Mode'}</div></div>
+        <div class="field-card"><div class="field-name">BFO (bit 11)</div><div class="field-value">${ex.bfo?'1 — BFO ON':'0 — BFO OFF'}</div></div>`;
+    }
+  },
+ 
+  // ── LABEL 044 / 045: ADF/NDB ───────────────────────────────
+  adf_044: {
+    label:'ADF/NDB 1 (044)', lo:0o044,
+    min:190.0, max:1750.0, step:1, unit:'kHz',
+    fields:[{name:'Frequency (kHz)', type:'freq'}],
+    encode(vals){
+      const f=parseFloat(vals.freq);
+      const r=Math.round(f);
+      const khz1000=Math.floor(r/1000)%10, khz100=Math.floor(r/100)%10,
+            khz10=Math.floor(r/10)%10, khz1=Math.floor(r)%10;
+      let d19=0;
+      d19|=(khz1000&0xF)<<15; d19|=(khz100&0xF)<<11;
+      d19|=(khz10&0xF)<<7;    d19|=(khz1&0xF)<<3;
+      return {d19, extra:{freq:r}};
+    },
+    extraCards(ex){ return ''; }
+  },
+  adf_045: {
+    label:'ADF 2 (045)', lo:0o045,
+    min:190.0, max:1750.0, step:1, unit:'kHz',
+    fields:[{name:'Frequency (kHz)', type:'freq'}],
+    encode(vals){
+      const f=parseFloat(vals.freq);
+      const r=Math.round(f);
+      const khz1000=Math.floor(r/1000)%10, khz100=Math.floor(r/100)%10,
+            khz10=Math.floor(r/10)%10, khz1=Math.floor(r)%10;
+      let d19=0;
+      d19|=(khz1000&0xF)<<15; d19|=(khz100&0xF)<<11;
+      d19|=(khz10&0xF)<<7;    d19|=(khz1&0xF)<<3;
+      return {d19, extra:{freq:r}};
+    },
+    extraCards(ex){ return ''; }
+  }
+};
+ 
+// ── SSM TABLE (Radio Frequency labels) ─────────────────────
+// 00=Normal, 01=NCD, 10=FT, 11=Undefined
+const SSM_NAMES = ['Normal (NML)','No Computed Data (NCD)','Functional Test (FT)','Undefined'];
+ 
+// ── MODE & LABEL SWITCHING ──────────────────────────────────
+let currentMode='nav';
+let currentLabelKey='nav_034';
+ 
 function setMode(m){
-  am=m;
+  currentMode=m;
   ['nav','com','adf'].forEach(k=>document.getElementById('btn-'+k).classList.toggle('active',k===m));
-  populateTypes(); updateHints();
-  document.getElementById('freq-input').value='';
-  document.getElementById('arinc-output').innerHTML='<div class="placeholder">─── Awaiting frequency input ───</div>';
-  document.getElementById('arinc-error').classList.remove('show');
+  currentLabelKey=MODES[m][0];
+  buildInputPanel();
+  document.getElementById('arinc-output').innerHTML='<div class="placeholder">─── Awaiting input ───</div>';
 }
-function populateTypes(){
-  const s=document.getElementById('freq-type'); s.innerHTML='';
-  AM[am].forEach((t,i)=>{const o=document.createElement('option');o.value=i;o.textContent=t.label;s.appendChild(o);});
+ 
+function buildInputPanel(){
+  const ldef=LABELS[currentLabelKey];
+  document.getElementById('input-panel-title').textContent='Frequency Input — '+ldef.label;
+  let html='';
+  // Label selector
+  html+=`<label>Frequency Type / Label</label>
+  <select id="label-select" onchange="onLabelChange()">`;
+  MODES[currentMode].forEach(k=>{
+    html+=`<option value="${k}" ${k===currentLabelKey?'selected':''}>${LABELS[k].label}</option>`;
+  });
+  html+='</select>';
+  // Dynamic fields
+  ldef.fields.forEach(f=>{
+    if(f.type==='freq'){
+      html+=`<label>Frequency (${ldef.unit}) <span style="color:var(--dim);font-size:0.55rem;font-weight:400;cursor:help" title="Valid range: ${ldef.min}–${ldef.max} ${ldef.unit}">ⓘ</span></label>
+      <input type="number" id="fi-freq" placeholder="${ldef.min.toFixed(ldef.step<1?3:ldef.step<0.1?2:1)}" step="${ldef.step}" min="${ldef.min}" max="${ldef.max}" oninput="clearErr();validateFreqInput(this,${ldef.min},${ldef.max})">
+      <div class="range-hint">Range: ${ldef.min}–${ldef.max} ${ldef.unit} | Step: ${ldef.step<1?(ldef.step*1000)+' Hz':ldef.step+' '+ldef.unit}</div>`;
+    } else if(f.type==='select'){
+      html+=`<label>${f.name}</label><select id="fi-${f.id}">`;
+      f.options.forEach((o,i)=>{ html+=`<option value="${i}">${o}</option>`; });
+      html+='</select>';
+    }
+  });
+  // SDI
+  html+=`<label>SDI (Source / Destination) <span style="color:var(--dim);font-size:0.55rem;font-weight:400;cursor:help" title="Identifies which system or receiver: 00=None, 01=System1, 10=System2, 11=System3">ⓘ</span></label>
+  <select id="fi-sdi">
+    <option value="0">00 – No statement</option>
+    <option value="1">01 – System 1</option>
+    <option value="2">10 – System 2</option>
+    <option value="3">11 – System 3</option>
+  </select>`;
+  // SSM — correct table for radio freq labels
+  html+=`<label>SSM (Sign / Status Matrix) <span style="color:var(--dim);font-size:0.55rem;font-weight:400;cursor:help" title="Word status: 00=Normal, 01=No Data, 10=Test Mode, 11=Undefined">ⓘ</span></label>
+  <select id="fi-ssm">
+    <option value="0">00 – Normal (NML)</option>
+    <option value="1">01 – No Computed Data (NCD)</option>
+    <option value="2">10 – Functional Test (FT)</option>
+    <option value="3">11 – Undefined</option>
+  </select>`;
+  html+=`<button class="btn-convert" onclick="arinc_convert()"><span>▶ ENCODE TO ARINC 429</span></button>
+  <div class="error-msg" id="arinc-error"></div>`;
+  document.getElementById('input-panel-body').innerHTML=html;
 }
-function getA(){ return AM[am][+document.getElementById('freq-type').value]; }
-function updateHints(){
-  const t=getA();
-  const st=t.step<1?(t.step*1000)+' Hz':t.step+' '+t.unit;
-  document.getElementById('range-hint').textContent=`Range: ${t.min}–${t.max} ${t.unit}  |  Step: ${st}`;
-  document.getElementById('freq-input').step=t.step;
-  document.getElementById('freq-input').min=t.min;
-  document.getElementById('freq-input').max=t.max;
-  document.getElementById('freq-input').placeholder=`e.g. ${t.min.toFixed(t.step<1?1:2)}`;
+ 
+function onLabelChange(){
+  currentLabelKey=document.getElementById('label-select').value;
+  buildInputPanel();
+  document.getElementById('arinc-output').innerHTML='<div class="placeholder">─── Awaiting input ───</div>';
 }
-function onFreqInput(){ document.getElementById('arinc-error').classList.remove('show'); }
-
-function navBCD(f){
-  const r=Math.round(f*20)/20;
-  const h=Math.floor(r/100), t=Math.floor((r%100)/10), o=Math.floor(r%10),
-        kh=Math.floor((r*10)%10), fl=Math.round((r*100)%10)>=5?1:0;
-  let d=0; d|=(h&0xF)<<15; d|=(t&0xF)<<11; d|=(o&0xF)<<7; d|=(kh&0xF)<<3; d|=(fl&1)<<2;
-  // Bit 14: ILS=1 when 108.10–111.95 MHz with odd 100kHz digit, VOR=0 otherwise
-  const isILS=(r>=108.10&&r<=111.95&&kh%2!==0);
-  if(isILS) d|=(1<<4);
-  return {d19:d, dbg:`${h}${t}${o}.${kh}${fl*5}0 MHz`, isILS};
-}
-function comBCD(f){
-  const r=Math.round(f*40)/40;
-  const h=Math.floor(r/100), t=Math.floor((r%100)/10), o=Math.floor(r%10),
-        kh=Math.floor((r*10)%10), sub=Math.round((r*1000)%100/25);
-  let d=0; d|=(h&0xF)<<15; d|=(t&0xF)<<11; d|=(o&0xF)<<7; d|=(kh&0xF)<<3; d|=(sub&3)<<1;
-  return {d19:d, dbg:`${h}${t}${o}.${kh}${(sub*25).toString().padStart(3,'0')} MHz`, isILS:null};
-}
-function adfBCD(f){
-  const r=Math.round(f*2)/2;
-  const th=Math.floor(r/1000), h=Math.floor((r%1000)/100),
-        t=Math.floor((r%100)/10), o=Math.floor(r%10), fl=(r*10)%10>=5?1:0;
-  let d=0; d|=(th&0xF)<<15; d|=(h&0xF)<<11; d|=(t&0xF)<<7; d|=(o&0xF)<<3; d|=(fl&1)<<2;
-  return {d19:d, dbg:`${th}${h}${t}${o}.${fl*5} kHz`, isILS:null};
-}
-
+ 
+function clearErr(){ const e=document.getElementById('arinc-error'); if(e) e.classList.remove('show'); }
+ 
+// ── ENCODE ──────────────────────────────────────────────────
 function oddP32(w){ let n=0; for(let i=0;i<31;i++) if((w>>i)&1) n++; return n%2===0?1:0; }
 function revB(b){ let r=0; for(let i=0;i<8;i++) r|=((b>>i)&1)<<(7-i); return r; }
-
+ 
 function arinc_convert(){
   const err=document.getElementById('arinc-error'); err.classList.remove('show');
-  const t=getA(); const f=parseFloat(document.getElementById('freq-input').value);
-  if(isNaN(f)){ err.textContent='⚠ Please enter a frequency.'; err.classList.add('show'); return; }
-  if(f<t.min||f>t.max){ err.textContent=`⚠ Out of range: ${t.min}–${t.max} ${t.unit}`; err.classList.add('show'); return; }
-  const sdi=parseInt(document.getElementById('sdi-select').value);
-  const ssm=parseInt(document.getElementById('ssm-select').value);
-  const lb=t.lo&0xFF;
-  const {d19,dbg,isILS}=t.fn(f);
-  let w=0; w|=(revB(lb)&0xFF); w|=(sdi&3)<<8; w|=(d19&0x7FFFF)<<10; w|=(ssm&3)<<29;
-  const p=oddP32(w); w|=(p&1)<<31;
-  renderA(w,t,f,d19,sdi,ssm,p,lb,dbg,isILS);
+  const ldef=LABELS[currentLabelKey];
+  // Gather values
+  const vals={};
+  const fi=document.getElementById('fi-freq');
+  if(fi){
+    const f=parseFloat(fi.value);
+    if(isNaN(f)){ err.textContent='⚠ Please enter a frequency.'; err.classList.add('show'); return; }
+    if(f<ldef.min||f>ldef.max){ err.textContent=`⚠ Out of range: ${ldef.min}–${ldef.max} ${ldef.unit}`; err.classList.add('show'); return; }
+    vals.freq=fi.value;
+  }
+  ldef.fields.forEach(f=>{ if(f.type==='select'){ const el=document.getElementById('fi-'+f.id); if(el) vals[f.id]=el.value; }});
+  const sdi=parseInt(document.getElementById('fi-sdi').value);
+  const ssm=parseInt(document.getElementById('fi-ssm').value);
+  const lb=ldef.lo&0xFF;
+  const {d19,extra}=ldef.encode(vals);
+  let w=0;
+  w|=(revB(lb)&0xFF);
+  w|=(d19&0x7FFFF)<<10;
+  w|=(sdi&0x3)<<8;
+  w|=(ssm&0x3)<<29;
+  w=w>>>0;
+  const p=oddP32(w); w|=(p&1)<<31; w=w>>>0;
+  renderWord(w,ldef,sdi,ssm,p,lb,d19,extra,vals.freq);
 }
-
-function renderA(word,type,freq,d19,sdi,ssm,parity,lb,dbg,isILS){
+ 
+function renderWord(word,ldef,sdi,ssm,parity,lb,d19,extra,freqVal){
   const hex='0x'+word.toString(16).toUpperCase().padStart(8,'0');
   const bin=word.toString(2).padStart(32,'0');
   const oct='0'+lb.toString(8).padStart(3,'0');
   const b=bin.split('');
-  const isNavLabel=(lb===0o034||lb===0o033||lb===0o035);
-
-  const pc=`<div class="bit-cell par">${b[0]}</div>`;
-  const sc=[1,2].map(i=>`<div class="bit-cell ssm">${b[i]}</div>`).join('');
-  const dc=Array.from({length:19},(_,k)=>3+k).map(i=>{
-    if(isNavLabel && i===18){ // bit14 = bin index 18
-      const v=b[i]==='1';
-      return `<div class="bit-cell" style="background:${v?'#1a3020':'#1a1a30'};border:1px solid ${v?'#2a5030':'#2a2a50'};color:${v?'#00ff9d':'#8080c0'}" title="Bit 14: ${v?'ILS':'VOR'}">${b[i]}</div>`;
-    }
-    return `<div class="bit-cell ${b[i]==='1'?'b1':'b0'}">${b[i]}</div>`;
+ 
+  const sections=[
+    {label:'P',cols:1,color:'#ff6b35'},
+    {label:'SSM',cols:2,color:'#00ff9d'},
+    {label:'DATA (bits 29–11)',cols:19,color:'#ffcc00'},
+    {label:'SDI',cols:2,color:'#8090a0'},
+    {label:'LABEL',cols:8,color:'#d080ff'},
+  ];
+  const hdr=sections.map(s=>`<th colspan="${s.cols}" style="background:#0a0e14;color:${s.color};font-family:'Share Tech Mono',monospace;font-size:clamp(0.42rem,1.3vw,0.6rem);padding:4px 2px;text-align:center;border:1px solid #1e3a5f;letter-spacing:0.05em">${s.label}</th>`).join('');
+  const nums=Array.from({length:32},(_,i)=>{
+    const n=32-i, c=i===0?'#ff6b35':i<=2?'#00ff9d':i<=21?'#ffcc00':i<=23?'#8090a0':'#d080ff';
+    return `<td style="font-family:'Share Tech Mono',monospace;font-size:clamp(0.35rem,1vw,0.5rem);color:${c};text-align:center;padding:2px 1px;border:1px solid #1e3a5f;min-width:clamp(14px,3vw,22px)">${n}</td>`;
   }).join('');
-  const ic=[22,23].map(i=>`<div class="bit-cell ${b[i]==='1'?'b1':'b0'}">${b[i]}</div>`).join('');
-  const lc=Array.from({length:8},(_,k)=>24+k).map(i=>`<div class="bit-cell lbl">${b[i]}</div>`).join('');
-  const ssmT=['Failure Warning','No Computed Data','Functional Test','Normal Operation'][ssm];
-  const sdiT=['No Statement','Receiver 1','Receiver 2','Receiver 3'][sdi];
-  const bit14val=(word>>13)&1;
-  const ilsCard=isNavLabel?`<div class="field-card"><div class="field-name">Bit 14 (ILS/VOR)</div><div class="field-value" style="color:${bit14val?'var(--accent2)':'#8080c0'}">${bit14val?'1 — ILS':'0 — VOR'}</div></div>`:'';
-
+  const vals=Array.from({length:32},(_,i)=>{
+    const v=b[i];
+    let bg,fg,br;
+    if(i===0){bg='#2a1a10';fg='#ff6b35';br='#402818';}
+    else if(i<=2){bg='#1a2a10';fg='#00ff9d';br='#2a4018';}
+    else if(i>=3&&i<=21){bg=v==='1'?'#1a3060':'#0d1a2a';fg=v==='1'?'#00d4ff':'#4a6080';br=v==='1'?'#234080':'#152030';}
+    else if(i<=23){bg=v==='1'?'#1a3060':'#0d1a2a';fg=v==='1'?'#00d4ff':'#4a6080';br=v==='1'?'#234080':'#152030';}
+    else{bg='#2a1a30';fg='#d080ff';br='#401840';}
+    return `<td style="font-family:'Share Tech Mono',monospace;font-size:clamp(0.5rem,1.4vw,0.7rem);font-weight:700;background:${bg};color:${fg};border:1px solid ${br};text-align:center;padding:5px 1px;min-width:clamp(14px,3vw,22px)">${v}</td>`;
+  }).join('');
+ 
+  const ssmT=SSM_NAMES[ssm];
+  const sdiT=['No Statement','System 1 (01)','System 2 (10)','System 3 (11)'][sdi];
+  const extraCards=ldef.extraCards({...extra, d19});
+ 
   document.getElementById('arinc-output').innerHTML=`
-    <div class="word-visual">
-      <div class="bit-row"><span class="bit-section-label">Bit 32</span><div class="bit-cells">${pc}</div><span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--accent3);margin-left:8px">PARITY</span></div>
-      <div class="bit-row"><span class="bit-section-label">31–30</span><div class="bit-cells">${sc}</div><span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--accent2);margin-left:8px">SSM</span></div>
-      <div class="bit-row"><span class="bit-section-label">29–11</span><div class="bit-cells">${dc}</div><span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--warn);margin-left:8px">DATA${isNavLabel?' (★=bit14)':''}</span></div>
-      <div class="bit-row"><span class="bit-section-label">10–9</span><div class="bit-cells">${ic}</div><span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--dim);margin-left:8px">SDI</span></div>
-      <div class="bit-row"><span class="bit-section-label">8–1</span><div class="bit-cells">${lc}</div><span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#d080ff;margin-left:8px">LABEL</span></div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:8px">
+      <table style="border-collapse:collapse;width:100%;min-width:480px">
+        <thead><tr>${hdr}</tr></thead>
+        <tbody><tr>${nums}</tr><tr>${vals}</tr></tbody>
+      </table>
     </div>
     <div class="legend">
       <div class="legend-item"><div class="legend-swatch" style="background:#2a1a10;border:1px solid #402818"></div>Parity</div>
@@ -332,18 +691,17 @@ function renderA(word,type,freq,d19,sdi,ssm,parity,lb,dbg,isILS){
     <div class="fields-grid" style="margin-top:14px">
       <div class="field-card"><div class="field-name">32-bit Word (Hex)</div><div class="field-value hex" id="out-hex">${hex}</div></div>
       <div class="field-card"><div class="field-name">32-bit Word (Dec)</div><div class="field-value">${word>>>0}</div></div>
-      <div class="field-card"><div class="field-name">Binary (bit32→bit1)</div><div class="field-value bin">${bin.match(/.{1,8}/g).join(' ')}</div></div>
-      <div class="field-card"><div class="field-name">Label (Octal)</div><div class="field-value oct">${oct}</div></div>
-      <div class="field-card"><div class="field-name">Encoded Frequency</div><div class="field-value">${dbg}</div></div>
-      <div class="field-card"><div class="field-name">Input Frequency</div><div class="field-value">${freq} ${type.unit}</div></div>
+      <div class="field-card"><div class="field-name">Binary (bit32→bit1) <button onclick="copyField('${bin.match(/.{1,8}/g).join(' ')}','Binary')" style="float:right;background:none;border:1px solid var(--dim);color:var(--dim);padding:2px 6px;border-radius:2px;font-size:0.5rem;cursor:pointer;font-family:inherit">📋</button></div><div class="field-value bin">${bin.match(/.{1,8}/g).join(' ')}</div></div>
+      <div class="field-card"><div class="field-name">Label (Octal) <button onclick="copyField('${oct}','Label')" style="float:right;background:none;border:1px solid var(--dim);color:var(--dim);padding:2px 6px;border-radius:2px;font-size:0.5rem;cursor:pointer;font-family:inherit">📋</button></div><div class="field-value oct">${oct}</div></div>
+      <div class="field-card"><div class="field-name">Input Frequency</div><div class="field-value">${freqVal||'—'} ${ldef.unit}</div></div>
       <div class="field-card"><div class="field-name">SSM (${ssm.toString(2).padStart(2,'0')}₂)</div><div class="field-value">${ssmT}</div></div>
       <div class="field-card"><div class="field-name">SDI (${sdi.toString(2).padStart(2,'0')}₂)</div><div class="field-value">${sdiT}</div></div>
       <div class="field-card"><div class="field-name">Parity Bit</div><div class="field-value">${parity} (Odd)</div></div>
       <div class="field-card"><div class="field-name">Data Field (19-bit)</div><div class="field-value">0x${d19.toString(16).toUpperCase()}</div></div>
-      ${ilsCard}
+      ${extraCards}
     </div>`;
 }
-
+ 
 function copyHex(){
   const el=document.getElementById('out-hex'); if(!el) return;
   navigator.clipboard.writeText(el.textContent).then(()=>{
@@ -351,8 +709,151 @@ function copyHex(){
     btn.textContent='COPIED!'; setTimeout(()=>btn.textContent='COPY HEX',1500);
   });
 }
-
-populateTypes(); updateHints();
+ 
+// ── QUICK WINS ──────────────────────────────────────────────
+function copyField(text,name){
+  navigator.clipboard.writeText(text).then(()=>showCopyNotif(name+' copied!'));
+}
+ 
+function showCopyNotif(msg){
+  let n=document.getElementById('copy-notif');
+  if(!n){
+    n=document.createElement('div');
+    n.id='copy-notif';
+    n.style.cssText='position:fixed;top:20px;right:20px;background:var(--accent);color:#000;padding:12px 20px;border-radius:6px;font-family:Share Tech Mono,monospace;font-size:0.7rem;letter-spacing:0.08em;z-index:10000;box-shadow:0 4px 12px rgba(0,212,255,0.3);opacity:0;transition:opacity 0.2s';
+    document.body.appendChild(n);
+  }
+  n.textContent=msg;
+  n.style.opacity='1';
+  setTimeout(()=>n.style.opacity='0',1500);
+}
+ 
+// Validation coloring
+function validateFreqInput(el,min,max){
+  const v=parseFloat(el.value);
+  if(isNaN(v)||v<min||v>max){
+    el.style.borderColor='#ff6060';
+    el.style.boxShadow='0 0 8px rgba(255,96,96,0.3)';
+  }else{
+    el.style.borderColor='var(--accent2)';
+    el.style.boxShadow='0 0 8px rgba(0,255,157,0.3)';
+  }
+}
+ 
+// Keyboard shortcuts
+document.addEventListener('keydown',(e)=>{
+  const fi=document.getElementById('fi-freq');
+  if(e.key==='Enter'&&document.activeElement===fi) arinc_convert();
+  if(e.ctrlKey&&e.shiftKey&&e.key==='C'){copyHex();e.preventDefault();}
+});
+ 
+// ── DECODE TABLE WITH CLICKABLE CELLS ──────────────────────
+function buildDecodeTable(){
+  const sections=[
+    {label:'P',cols:1,color:'#ff6b35'},
+    {label:'SSM',cols:2,color:'#00ff9d'},
+    {label:'DATA (bits 29–11)',cols:19,color:'#ffcc00'},
+    {label:'SDI',cols:2,color:'#8090a0'},
+    {label:'LABEL',cols:8,color:'#d080ff'},
+  ];
+  const hRow=document.getElementById('decode-header-row');
+  const nRow=document.getElementById('decode-num-row');
+  const iRow=document.getElementById('decode-input-row');
+  hRow.innerHTML=sections.map(s=>`<th colspan="${s.cols}" style="background:#0a0e14;color:${s.color};font-family:'Share Tech Mono',monospace;font-size:clamp(0.42rem,1.3vw,0.6rem);padding:4px 2px;text-align:center;border:1px solid #1e3a5f;letter-spacing:0.05em">${s.label}</th>`).join('');
+  for(let i=0;i<32;i++){
+    const n=32-i, c=i===0?'#ff6b35':i<=2?'#00ff9d':i<=21?'#ffcc00':i<=23?'#8090a0':'#d080ff';
+    const td=document.createElement('td');
+    td.style.cssText='text-align:center;padding:2px 1px;border:1px solid #1e3a5f';
+    td.innerHTML=`<span style="font-family:'Share Tech Mono',monospace;font-size:clamp(0.35rem,1vw,0.5rem);color:${c}">${n}</span>`;
+    nRow.appendChild(td);
+    const ti=document.createElement('td');
+    ti.style.cssText='padding:2px 1px;border:1px solid #1e3a5f;text-align:center';
+    ti.innerHTML=`<div class="decode-cell" id="dc${i}" onclick="toggleBit(${i})">0</div>`;
+    iRow.appendChild(ti);
+  }
+}
+ 
+function toggleBit(i){
+  const el=document.getElementById('dc'+i);
+  el.textContent=el.textContent==='0'?'1':'0';
+  el.classList.toggle('bit-on',el.textContent==='1');
+  document.getElementById('decode-error').classList.remove('show');
+}
+ 
+function clearDecode(){
+  for(let i=0;i<32;i++){
+    const el=document.getElementById('dc'+i);
+    el.textContent='0';
+    el.classList.remove('bit-on');
+  }
+  document.getElementById('decode-output').innerHTML='';
+  document.getElementById('decode-error').classList.remove('show');
+}
+ 
+function decode_word(){
+  const err=document.getElementById('decode-error'); err.classList.remove('show');
+  let bin='';
+  for(let i=0;i<32;i++){ bin+=document.getElementById('dc'+i).textContent; }
+  const word=parseInt(bin,2)>>>0;
+  
+  // Extract fields
+  const parity=(word>>31)&1;
+  const ssm=(word>>29)&3;
+  const d19=(word>>10)&0x7FFFF;
+  const sdi=(word>>8)&3;
+  const labelRaw=word&0xFF;
+  let lb=0; for(let i=0;i<8;i++) lb|=((labelRaw>>i)&1)<<(7-i);
+  const labelOct='0'+lb.toString(8).padStart(3,'0');
+  let ones=0; for(let i=0;i<32;i++) if((word>>i)&1) ones++;
+  const parityOk=ones%2===1;
+  const ssmT=SSM_NAMES[ssm];
+  const sdiT=['No Statement','System 1 (01)','System 2 (10)','System 3 (11)'][sdi];
+ 
+  // Decode frequency
+  let freqStr='Unknown label', extraHtml='';
+  const decoders={
+    [0o030]:{name:'VHF Comm',  fn:()=>{ const mhz100=(d19>>15)&0xF,mhz10=(d19>>11)&0xF,mhz1=(d19>>7)&0xF,khz100=(d19>>3)&0xF,khz10=d19&0x7; return `${mhz100}${mhz10}${mhz1}.${khz100}${khz10}00 MHz`; }},
+    [0o032]:{name:'ADF',       fn:()=>{ const k1000=(d19>>15)&0xF,k100=(d19>>11)&0xF,k10=(d19>>7)&0xF,k1=(d19>>3)&0xF,fl=(d19>>3)&1,ant=(d19>>1)&1,bfo=d19&1; extraHtml=`<div class="field-card"><div class="field-name">0.5kHz Flag</div><div class="field-value">${fl}</div></div><div class="field-card"><div class="field-name">Mode</div><div class="field-value">${ant?'ANT':'ADF'}</div></div><div class="field-card"><div class="field-name">BFO</div><div class="field-value">${bfo?'ON':'OFF'}</div></div>`; return `${k1000}${k100}${k10}${k1}.${fl*5} kHz`; }},
+    [0o033]:{name:'ILS',       fn:()=>{ const m10=(d19>>15)&0xF,m1=(d19>>11)&0xF,k100=(d19>>7)&0xF,k10=(d19>>3)&0xF,cat=d19&0x3; const catN=['UND','CAT I','CAT II','CAT III']; extraHtml=`<div class="field-card"><div class="field-name">ILS Category</div><div class="field-value" style="color:var(--warn)">${catN[cat]}</div></div>`; return `1${m10}${m1}.${k100}${k10} MHz`; }},
+    [0o034]:{name:'VOR/ILS',   fn:()=>{ const m10=(d19>>15)&0xF,m1=(d19>>11)&0xF,k100=(d19>>7)&0xF,k10=(d19>>3)&0xF,b14=(d19>>3)&1; extraHtml=`<div class="field-card"><div class="field-name">Bit 14</div><div class="field-value" style="color:${b14?'var(--accent2)':'#8080c0'}">${b14?'1 — ILS':'0 — VOR'}</div></div>`; return `1${m10}${m1}.${k100}${k10} MHz`; }},
+    [0o035]:{name:'DME',       fn:()=>{ const m10=(d19>>15)&0xF,m1=(d19>>11)&0xF,k100=(d19>>7)&0xF,id=(d19>>6)&1,disp=(d19>>5)&1,nm=(d19>>3)&3; const nmN=['VOR','ILS','MLS','UND']; extraHtml=`<div class="field-card"><div class="field-name">Ident</div><div class="field-value">${id?'ON':'OFF'}</div></div><div class="field-card"><div class="field-name">Display</div><div class="field-value">${disp?'ON':'OFF'}</div></div><div class="field-card"><div class="field-name">NAV Mode</div><div class="field-value">${nmN[nm]}</div></div>`; return `1${m10}${m1}.${k100} MHz`; }},
+    [0o044]:{name:'ADF/NDB 1', fn:()=>{ const k1000=(d19>>15)&0xF,k100=(d19>>11)&0xF,k10=(d19>>7)&0xF,k1=(d19>>3)&0xF; return `${k1000}${k100}${k10}${k1} kHz`; }},
+    [0o045]:{name:'ADF 2',     fn:()=>{ const k1000=(d19>>15)&0xF,k100=(d19>>11)&0xF,k10=(d19>>7)&0xF,k1=(d19>>3)&0xF; return `${k1000}${k100}${k10}${k1} kHz`; }},
+  };
+  const dec=decoders[lb];
+  if(dec){ freqStr=dec.fn(); }
+ 
+  document.getElementById('decode-output').innerHTML=`
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:${parityOk?'var(--accent2)':'#ff6060'};margin-bottom:10px;letter-spacing:0.06em">
+      ${parityOk?'✔ Parity OK (odd)':'✘ Parity ERROR — word may be corrupted'}
+    </div>
+    <div class="fields-grid">
+      <div class="field-card"><div class="field-name">32-bit Word (Hex)</div><div class="field-value hex">0x${word.toString(16).toUpperCase().padStart(8,'0')}</div></div>
+      <div class="field-card"><div class="field-name">Label (Octal)</div><div class="field-value oct">${labelOct}${dec?' — '+dec.name:''}</div></div>
+      <div class="field-card"><div class="field-name">Decoded Frequency</div><div class="field-value" style="color:var(--warn)">${freqStr}</div></div>
+      <div class="field-card"><div class="field-name">SSM (${ssm.toString(2).padStart(2,'0')}₂)</div><div class="field-value">${ssmT}</div></div>
+      <div class="field-card"><div class="field-name">SDI (${sdi.toString(2).padStart(2,'0')}₂)</div><div class="field-value">${sdiT}</div></div>
+      <div class="field-card"><div class="field-name">Data Field (19-bit)</div><div class="field-value">0x${d19.toString(16).toUpperCase()}</div></div>
+      <div class="field-card"><div class="field-name">Parity Bit</div><div class="field-value" style="color:${parityOk?'var(--accent2)':'#ff6060'}">${parity} (${parityOk?'OK':'ERROR'})</div></div>
+      <div class="field-card"><div class="field-name">Binary (bit32→bit1)</div><div class="field-value bin">${bin.match(/.{1,8}/g).join(' ')}</div></div>
+      ${extraHtml}
+    </div>`;
+}
+ 
+// ── DEVICE SELECTION ────────────────────────────────────────
+function selectDevice(type){
+  document.body.classList.remove('phone','pc');
+  document.body.classList.add(type==='phone'?'phone':'pc');
+  const ov=document.getElementById('device-overlay');
+  ov.style.opacity='0'; ov.style.transition='opacity 0.4s';
+  setTimeout(()=>ov.style.display='none',400);
+  localStorage.setItem('arinc-device',type);
+}
+ 
+// ── INIT ────────────────────────────────────────────────────
+buildInputPanel();
+buildDecodeTable();
+(function(){ const s=localStorage.getItem('arinc-device'); if(s) selectDevice(s); })();
 </script>
 </body>
 </html>
